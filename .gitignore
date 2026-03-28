@@ -1,3 +1,10 @@
 node_modules
 dist
 .claude/worktrees/
+
+# Capacitor iOS
+ios/DerivedData/
+ios/App/Pods/
+
+# Deploy logs
+scripts/*.log

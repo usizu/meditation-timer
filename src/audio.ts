@@ -1,15 +1,14 @@
 /**
- * Audio module — the audio element is the source of truth for session time.
- *
- * A WAV matching the exact timer duration is generated with a completion
- * chime baked into the last 3 seconds. Because the chime lives inside the
- * audio file itself, it plays even from the lockscreen / background.
+ * Audio module — a silent audio element is the source of truth for session
+ * time. When the session ends, the completion chime plays through the SAME
+ * audio element so it reuses the existing media session (no extra lockscreen
+ * entry). MediaSession metadata shows the app icon as album art.
  */
 
 let audioEl: HTMLAudioElement | null = null;
 let audioUrl: string | null = null;
 let rafId = 0;
-let lastPositionUpdate = 0;
+let isPlayingChime = false;
 
 let onTickCb: ((curSec: number, durSec: number) => void) | null = null;
 let onEndedCb: (() => void) | null = null;
@@ -18,8 +17,6 @@ let onPlayCb: (() => void) | null = null;
 
 /* ── WAV generation ── */
 
-const CHIME_SECS = 3;
-const CHIME_FREQS = [523.25, 659.25, 783.99]; /* C5, E5, G5 */
 const SAMPLE_RATE = 8000;
 
 function writeStr(view: DataView, offset: number, str: string): void {
@@ -28,19 +25,14 @@ function writeStr(view: DataView, offset: number, str: string): void {
 	}
 }
 
-/**
- * 8 kHz · 8-bit · mono WAV.
- * Silence for most of the file, with a synthesised C-E-G chime
- * in the final CHIME_SECS seconds.
- */
-function createSessionWav(durationSeconds: number): Blob {
+/** 8 kHz · 8-bit · mono WAV — pure silence. */
+function createSilentWav(durationSeconds: number): Blob {
 	const numSamples = Math.ceil(SAMPLE_RATE * durationSeconds);
 	const dataSize = numSamples;
 	const buf = new ArrayBuffer(44 + dataSize);
 	const v = new DataView(buf);
 	const bytes = new Uint8Array(buf);
 
-	/* header */
 	writeStr(v, 0, "RIFF");
 	v.setUint32(4, 36 + dataSize, true);
 	writeStr(v, 8, "WAVE");
@@ -55,20 +47,40 @@ function createSessionWav(durationSeconds: number): Blob {
 	writeStr(v, 36, "data");
 	v.setUint32(40, dataSize, true);
 
-	/* silence (128 = zero-crossing for unsigned 8-bit PCM) */
-	bytes.fill(128, 44);
+	bytes.fill(128, 44); /* 128 = zero-crossing for unsigned 8-bit */
 
-	/* chime in the last CHIME_SECS seconds */
-	const chimeSamples = Math.min(
-		Math.ceil(SAMPLE_RATE * CHIME_SECS),
-		numSamples,
-	);
-	const chimeStart = numSamples - chimeSamples;
+	return new Blob([buf], { type: "audio/wav" });
+}
+
+/* ── Completion chime ── */
+
+const CHIME_RATE = 44100;
+const CHIME_FREQS = [523.25, 659.25, 783.99]; /* C5, E5, G5 */
+const CHIME_DURATION = 2.5; /* seconds */
+
+function createChimeWav(): Blob {
+	const numSamples = Math.ceil(CHIME_RATE * CHIME_DURATION);
+	const buf = new ArrayBuffer(44 + numSamples * 2);
+	const v = new DataView(buf);
+
+	/* WAV header — 16-bit mono */
+	writeStr(v, 0, "RIFF");
+	v.setUint32(4, 36 + numSamples * 2, true);
+	writeStr(v, 8, "WAVE");
+	writeStr(v, 12, "fmt ");
+	v.setUint32(16, 16, true);
+	v.setUint16(20, 1, true); /* PCM */
+	v.setUint16(22, 1, true); /* mono */
+	v.setUint32(24, CHIME_RATE, true);
+	v.setUint32(28, CHIME_RATE * 2, true); /* byteRate */
+	v.setUint16(32, 2, true); /* blockAlign */
+	v.setUint16(34, 16, true); /* bitsPerSample */
+	writeStr(v, 36, "data");
+	v.setUint32(40, numSamples * 2, true);
+
 	const twoPi = 2 * Math.PI;
-	const amp = 55; /* ±55 from centre → range 73-183 */
-
-	for (let i = 0; i < chimeSamples; i++) {
-		const t = i / SAMPLE_RATE;
+	for (let i = 0; i < numSamples; i++) {
+		const t = i / CHIME_RATE;
 		const attack = Math.min(1, t / 0.03);
 		const decay = Math.exp(-t * 1.3);
 		const env = attack * decay;
@@ -79,11 +91,31 @@ function createSessionWav(durationSeconds: number): Blob {
 		}
 		sig /= CHIME_FREQS.length;
 
-		const val = 128 + Math.round(sig * env * amp);
-		bytes[44 + chimeStart + i] = Math.max(0, Math.min(255, val));
+		const sample = Math.max(-32768, Math.min(32767, sig * env * 16000));
+		v.setInt16(44 + i * 2, sample, true);
 	}
 
 	return new Blob([buf], { type: "audio/wav" });
+}
+
+/**
+ * Play the chime through the existing audio element so it reuses
+ * the same media session — no extra lockscreen entry.
+ */
+export function playChime(): void {
+	if (!audioEl) return;
+	isPlayingChime = true;
+	cancelAnimationFrame(rafId);
+
+	const blob = createChimeWav();
+	const chimeUrl = URL.createObjectURL(blob);
+
+	/* release the silent WAV URL */
+	if (audioUrl) URL.revokeObjectURL(audioUrl);
+	audioUrl = chimeUrl;
+
+	audioEl.src = chimeUrl;
+	audioEl.play();
 }
 
 /* ── Playback control ── */
@@ -98,12 +130,6 @@ export interface SessionAudioCallbacks {
 function tick(): void {
 	if (audioEl && onTickCb && !audioEl.paused) {
 		onTickCb(audioEl.currentTime, audioEl.duration);
-
-		const now = performance.now();
-		if (now - lastPositionUpdate > 1000) {
-			updatePositionState();
-			lastPositionUpdate = now;
-		}
 	}
 	rafId = requestAnimationFrame(tick);
 }
@@ -119,23 +145,45 @@ export function create(
 	onPauseCb = cbs.onPause;
 	onPlayCb = cbs.onPlay;
 
-	const blob = createSessionWav(durationMinutes * 60);
+	const blob = createSilentWav(durationMinutes * 60);
 	audioUrl = URL.createObjectURL(blob);
 
 	audioEl = new Audio(audioUrl);
 	audioEl.volume = 1;
 
-	audioEl.addEventListener("ended", () => onEndedCb?.());
+	audioEl.addEventListener("ended", () => {
+		if (isPlayingChime) {
+			/* chime finished — nothing more to do */
+			isPlayingChime = false;
+			return;
+		}
+		onEndedCb?.();
+	});
 	audioEl.addEventListener("pause", () => {
 		cancelAnimationFrame(rafId);
-		updatePositionState();
-		onPauseCb?.();
+		if (!isPlayingChime) onPauseCb?.();
 	});
 	audioEl.addEventListener("play", () => {
-		lastPositionUpdate = 0;
-		rafId = requestAnimationFrame(tick);
-		onPlayCb?.();
+		if (!isPlayingChime) {
+			rafId = requestAnimationFrame(tick);
+			onPlayCb?.();
+		}
 	});
+
+	/* show app icon as album art on lockscreen — no playback controls */
+	if ("mediaSession" in navigator) {
+		const base = document.baseURI;
+		navigator.mediaSession.metadata = new MediaMetadata({
+			title: `${durationMinutes} min meditation`,
+			artist: "Kitty Timer",
+			artwork: [
+				{
+					src: new URL("lockscreen-art.png", base).href,
+					sizes: "512x512",
+				},
+			],
+		});
+	}
 }
 
 export function play(): Promise<void> {
@@ -149,25 +197,17 @@ export function pause(): void {
 export function seekTo(timeSec: number): void {
 	if (!audioEl || !Number.isFinite(audioEl.duration)) return;
 	audioEl.currentTime = Math.max(0, Math.min(timeSec, audioEl.duration));
-	updatePositionState();
 	onTickCb?.(audioEl.currentTime, audioEl.duration);
 }
 
-/** Lightweight seek for drag — skips MediaSession to avoid thrashing. */
 export function seekDrag(timeSec: number): void {
 	if (!audioEl || !Number.isFinite(audioEl.duration)) return;
 	audioEl.currentTime = Math.max(0, Math.min(timeSec, audioEl.duration));
 	onTickCb?.(audioEl.currentTime, audioEl.duration);
 }
 
-/** Sync MediaSession after a drag ends. */
 export function flushPositionState(): void {
-	updatePositionState();
-}
-
-export function seekBy(deltaSec: number): void {
-	if (!audioEl) return;
-	seekTo(audioEl.currentTime + deltaSec);
+	/* no-op — kept for call-site compatibility */
 }
 
 export function getCurrentTime(): number {
@@ -179,13 +219,17 @@ export function getDuration(): number {
 }
 
 export function destroy(): void {
+	isPlayingChime = false;
 	onTickCb = null;
 	onEndedCb = null;
 	onPauseCb = null;
 	onPlayCb = null;
 
 	cancelAnimationFrame(rafId);
-	clearMediaSession();
+
+	if ("mediaSession" in navigator) {
+		navigator.mediaSession.metadata = null;
+	}
 
 	if (audioEl) {
 		audioEl.pause();
@@ -196,68 +240,5 @@ export function destroy(): void {
 	if (audioUrl) {
 		URL.revokeObjectURL(audioUrl);
 		audioUrl = null;
-	}
-}
-
-/* ── Media Session (lockscreen controls) ── */
-
-const SEEK_STEP = 30;
-
-export function setupMediaSession(title: string, onStop: () => void): void {
-	if (!("mediaSession" in navigator)) return;
-
-	navigator.mediaSession.metadata = new MediaMetadata({
-		title,
-		artist: "Cosmic Timer",
-		album: "Meditation",
-	});
-
-	navigator.mediaSession.setActionHandler("play", () => play());
-	navigator.mediaSession.setActionHandler("pause", () => pause());
-	navigator.mediaSession.setActionHandler("stop", onStop);
-	navigator.mediaSession.setActionHandler("seekforward", (d) => {
-		seekBy(d.seekOffset ?? SEEK_STEP);
-	});
-	navigator.mediaSession.setActionHandler("seekbackward", (d) => {
-		seekBy(-(d.seekOffset ?? SEEK_STEP));
-	});
-	navigator.mediaSession.setActionHandler("seekto", (d) => {
-		if (d.seekTime != null) seekTo(d.seekTime);
-	});
-
-	updatePositionState();
-}
-
-function updatePositionState(): void {
-	if (
-		!("mediaSession" in navigator) ||
-		!audioEl ||
-		!Number.isFinite(audioEl.duration)
-	)
-		return;
-	try {
-		navigator.mediaSession.setPositionState({
-			duration: audioEl.duration,
-			playbackRate: audioEl.playbackRate,
-			position: Math.min(audioEl.currentTime, audioEl.duration),
-		});
-	} catch {
-		/* not supported on all browsers */
-	}
-}
-
-function clearMediaSession(): void {
-	if (!("mediaSession" in navigator)) return;
-	navigator.mediaSession.metadata = null;
-	const actions: MediaSessionAction[] = [
-		"play",
-		"pause",
-		"stop",
-		"seekforward",
-		"seekbackward",
-		"seekto",
-	];
-	for (const a of actions) {
-		navigator.mediaSession.setActionHandler(a, null);
 	}
 }

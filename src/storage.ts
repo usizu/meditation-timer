@@ -6,6 +6,7 @@ export interface SessionRecord {
 }
 
 const STORAGE_KEY = "cosmic-timer-history";
+const DURATION_KEY = "cosmic-timer-duration";
 
 export function saveSession(record: SessionRecord): void {
 	const history = getHistory();
@@ -20,4 +21,14 @@ export function getHistory(): SessionRecord[] {
 	} catch {
 		return [];
 	}
+}
+
+export function saveDuration(minutes: number): void {
+	localStorage.setItem(DURATION_KEY, String(minutes));
+}
+
+export function loadDuration(): number {
+	const raw = localStorage.getItem(DURATION_KEY);
+	const val = raw ? Number(raw) : 5;
+	return val > 0 && val <= 180 ? val : 5;
 }

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+		Daily iOS deploy for Cosmic Timer
+		Free dev account builds expire every 7 days — this rebuilds daily.
+
+		Install:
+			cp scripts/com.cosmic-timer.daily-deploy.plist ~/Library/LaunchAgents/
+			launchctl load ~/Library/LaunchAgents/com.cosmic-timer.daily-deploy.plist
+
+		Uninstall:
+			launchctl unload ~/Library/LaunchAgents/com.cosmic-timer.daily-deploy.plist
+			rm ~/Library/LaunchAgents/com.cosmic-timer.daily-deploy.plist
+
+		Requirements:
+			- iPhone must be connected via USB or on same Wi-Fi
+			- Mac must be unlocked (or have auto-unlock configured)
+	-->
+	<key>Label</key>
+	<string>com.cosmic-timer.daily-deploy</string>
+
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/aks/Projects/Code/vibe-coded/cosmic-timer/scripts/deploy-ios.sh</string>
+	</array>
+
+	<!-- Run daily at 10:00 AM -->
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>10</integer>
+		<key>Minute</key>
+		<integer>0</integer>
+	</dict>
+
+	<key>StandardOutPath</key>
+	<string>/Users/aks/Projects/Code/vibe-coded/cosmic-timer/scripts/deploy-stdout.log</string>
+
+	<key>StandardErrorPath</key>
+	<string>/Users/aks/Projects/Code/vibe-coded/cosmic-timer/scripts/deploy-stderr.log</string>
+
+	<!-- Ensure PATH includes Homebrew, pnpm, Xcode CLI tools -->
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+</dict>
+</plist>

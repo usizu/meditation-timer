@@ -50,7 +50,7 @@ function createNebula(): Nebula {
 		x: Math.random() * w,
 		y: Math.random() * h,
 		radius: 100 + Math.random() * 200,
-		hue: Math.random() > 0.5 ? 270 : 185 /* purple or cyan */,
+		hue: Math.random() > 0.5 ? 280 : 160 /* lavender or mint */,
 		alpha: 0.02 + Math.random() * 0.03,
 	};
 }

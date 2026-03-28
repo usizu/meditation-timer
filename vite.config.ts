@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync } from "node:fs";
+import type { PluginOption } from "vite";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
@@ -22,20 +23,21 @@ export default defineConfig(({ command }) => {
 	/* only bump on production build, not dev server */
 	const version = command === "build" ? bumpPatch() : readVersion();
 
-	return {
-		base: "/meditation-timer/",
-		define: {
-			__BUILD_ID__: JSON.stringify(`v${version}`),
-		},
-		plugins: [
+	/* Capacitor builds serve from local files — use relative base */
+	const isCap = !!process.env.CAP;
+
+	/* PWA plugin not needed for native Capacitor builds */
+	const plugins: PluginOption[] = [];
+	if (!isCap) {
+		plugins.push(
 			VitePWA({
 				registerType: "autoUpdate",
 				manifest: {
-					name: "Cosmic Timer",
-					short_name: "Cosmic Timer",
-					description: "A cosmic meditation timer",
-					theme_color: "#0a0a1a",
-					background_color: "#0a0a1a",
+					name: "Kitty Timer",
+					short_name: "Kitty Timer",
+					description: "A kitty meditation timer",
+					theme_color: "#1a0e2e",
+					background_color: "#1a0e2e",
 					display: "standalone",
 					orientation: "portrait",
 					icons: [
@@ -61,6 +63,14 @@ export default defineConfig(({ command }) => {
 					globPatterns: ["**/*.{js,css,html,png,svg,woff2}"],
 				},
 			}),
-		],
+		);
+	}
+
+	return {
+		base: isCap ? "./" : "/meditation-timer/",
+		define: {
+			__BUILD_ID__: JSON.stringify(`v${version}`),
+		},
+		plugins,
 	};
 });
