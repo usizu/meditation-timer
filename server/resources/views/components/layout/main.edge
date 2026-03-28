@@ -145,6 +145,179 @@
 			border-color: #3f3f46;
 			color: #e4e4e7;
 		}
+
+		/* Friends page */
+		.friends-page {
+			width: 100%;
+		}
+
+		.friends-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 1.5rem;
+		}
+
+		.friends-header h1 {
+			margin-bottom: 0;
+			text-align: left;
+		}
+
+		.back-link {
+			color: #a78bfa;
+			text-decoration: none;
+			font-size: 0.875rem;
+		}
+
+		.back-link:hover {
+			text-decoration: underline;
+		}
+
+		.success {
+			background: #14291a;
+			border: 1px solid #166534;
+			color: #86efac;
+			padding: 0.75rem 1rem;
+			border-radius: 8px;
+			font-size: 0.875rem;
+			margin-bottom: 1rem;
+		}
+
+		.info {
+			background: #172554;
+			border: 1px solid #1e40af;
+			color: #93c5fd;
+			padding: 0.75rem 1rem;
+			border-radius: 8px;
+			font-size: 0.875rem;
+			margin-bottom: 1rem;
+		}
+
+		.add-friend-form {
+			display: flex;
+			gap: 0.5rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.add-friend-form input {
+			flex: 1;
+		}
+
+		.add-friend-form button {
+			width: auto;
+			padding: 0.75rem 1.25rem;
+			flex-shrink: 0;
+		}
+
+		.section {
+			margin-bottom: 1.5rem;
+		}
+
+		.section-title {
+			font-size: 0.75rem;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			color: #71717a;
+			margin-bottom: 0.5rem;
+		}
+
+		.friend-card {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.75rem;
+			background: #18181b;
+			border: 1px solid #27272a;
+			border-radius: 8px;
+			margin-bottom: 0.375rem;
+		}
+
+		.friend-card.pending {
+			opacity: 0.7;
+		}
+
+		.friend-info {
+			flex: 1;
+			min-width: 0;
+		}
+
+		.friend-email {
+			display: block;
+			font-size: 0.875rem;
+			color: #e4e4e7;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.friend-time {
+			font-size: 0.75rem;
+			color: #71717a;
+		}
+
+		.friend-status {
+			font-size: 0.75rem;
+			color: #71717a;
+			font-style: italic;
+		}
+
+		.friend-toggles {
+			display: flex;
+			gap: 0.25rem;
+			flex-shrink: 0;
+		}
+
+		.toggle-btn {
+			width: auto;
+			padding: 0.25rem 0.5rem;
+			background: #27272a;
+			border: 1px solid #3f3f46;
+			border-radius: 6px;
+			font-size: 0.6875rem;
+			color: #71717a;
+			display: flex;
+			align-items: center;
+			gap: 0.25rem;
+			cursor: pointer;
+			transition: all 0.15s;
+		}
+
+		.toggle-btn.active {
+			background: #312e81;
+			border-color: #4338ca;
+			color: #a5b4fc;
+		}
+
+		.toggle-btn:hover {
+			border-color: #52525b;
+		}
+
+		.toggle-icon {
+			font-size: 0.75rem;
+		}
+
+		.remove-btn {
+			width: auto;
+			padding: 0.25rem 0.5rem;
+			background: transparent;
+			border: none;
+			color: #52525b;
+			font-size: 1.25rem;
+			cursor: pointer;
+			line-height: 1;
+		}
+
+		.remove-btn:hover {
+			color: #ef4444;
+			background: transparent;
+		}
+
+		.empty-state {
+			text-align: center;
+			color: #52525b;
+			font-size: 0.875rem;
+			padding: 2rem 0;
+		}
 	</style>
 </head>
 <body>
