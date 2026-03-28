@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import Meditation from '#models/meditation'
 import Friendship from '#models/friendship'
 import logger from '@adonisjs/core/services/logger'
+import sseManager from '#services/sse_manager'
 
 export default class MeditationsController {
 	/**
@@ -34,9 +35,16 @@ export default class MeditationsController {
 			'Meditation started'
 		)
 
+		/* Push SSE update to connected friends */
+		const friendIds = friendsToNotify.map((f) => f.id)
+		sseManager.broadcastToUsers(
+			friendIds,
+			`#friend-status-${userId}`,
+			`<span id="friend-status-${userId}" class="meditating-indicator">meditating</span>`
+		)
+
 		/*
 		 * TODO Phase 5: Send web push notifications to friendsToNotify
-		 * TODO Phase 4: Push Datastar SSE update to connected friends
 		 */
 
 		return response.json({
@@ -68,10 +76,13 @@ export default class MeditationsController {
 
 		logger.info({ userId, meditationId: meditation.id }, 'Meditation ended')
 
-		/*
-		 * TODO Phase 4: Push Datastar SSE update to connected friends
-		 *               (remove "currently meditating" indicator)
-		 */
+		/* Push SSE update to connected friends — remove meditating indicator */
+		const allFriends = await this.getConfirmedFriendIds(userId)
+		sseManager.broadcastToUsers(
+			allFriends,
+			`#friend-status-${userId}`,
+			`<span id="friend-status-${userId}"></span>`
+		)
 
 		return response.json({
 			id: meditation.id,
@@ -113,5 +124,18 @@ export default class MeditationsController {
 		}
 
 		return toNotify
+	}
+
+	/**
+	 * Get all confirmed friend user IDs (for SSE broadcast on meditation end).
+	 */
+	private async getConfirmedFriendIds(userId: number): Promise<number[]> {
+		const friendships = await Friendship.query()
+			.where((q) => {
+				q.where('user_a_id', userId).orWhere('user_b_id', userId)
+			})
+			.andWhere('confirmed', true)
+
+		return friendships.map((f) => f.userAId === userId ? f.userBId : f.userAId)
 	}
 }

@@ -1,6 +1,6 @@
 @layout.main({ title: 'Friends — Kitty Timer' })
 	@slot('main')
-		<div class="friends-page">
+		<div class="friends-page" data-on-load="$$get('/sse/updates')">
 			<div class="friends-header">
 				<h1>Friends</h1>
 				<a href="{{ route('home') }}" class="back-link">&larr; Back</a>
@@ -35,7 +35,13 @@
 					@each(friend in friends)
 						<div class="friend-card">
 							<div class="friend-info">
-								<span class="friend-email">{{ friend.email }}</span>
+								<div class="friend-name-row">
+									<span class="friend-email">{{ friend.email }}</span>
+									<span
+										id="friend-status-{{ friend.userId }}"
+										class="{{ friend.isMeditating ? 'meditating-indicator' : '' }}"
+									>{{ friend.isMeditating ? 'meditating' : '' }}</span>
+								</div>
 								<span class="friend-time" data-timezone="{{ friend.timezone }}">
 									{{ friend.timezone }}
 								</span>

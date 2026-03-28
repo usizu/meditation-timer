@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Friendship from '#models/friendship'
+import Meditation from '#models/meditation'
 import User from '#models/user'
 
 export default class FriendsController {
@@ -30,16 +31,27 @@ export default class FriendsController {
 			.andWhere('confirmed', false)
 			.preload('userA')
 
+		/* Check which friends are currently meditating */
+		const friendUserIds = confirmed.map((f) => f.userAId === userId ? f.userBId : f.userAId)
+		const activeMeditations = friendUserIds.length > 0
+			? await Meditation.query()
+				.whereIn('user_id', friendUserIds)
+				.whereNull('ended_at')
+			: []
+		const meditatingUserIds = new Set(activeMeditations.map((m) => m.userId))
+
 		const friends = confirmed.map((f) => {
 			const isA = f.userAId === userId
 			const friend = isA ? f.userB : f.userA
 			const toggles = f.togglesFor(userId)
 			return {
 				id: f.id,
+				userId: friend.id,
 				email: friend.email,
 				timezone: friend.timezone,
 				notifyThem: toggles.notifyThem,
 				notifyMe: toggles.notifyMe,
+				isMeditating: meditatingUserIds.has(friend.id),
 			}
 		})
 

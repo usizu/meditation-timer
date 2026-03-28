@@ -4,6 +4,7 @@ import { middleware } from '#start/kernel'
 const AuthController = () => import('#controllers/auth_controller')
 const FriendsController = () => import('#controllers/friends_controller')
 const MeditationsController = () => import('#controllers/meditations_controller')
+const SseController = () => import('#controllers/sse_controller')
 
 /*
 |--------------------------------------------------------------------------
@@ -50,4 +51,16 @@ router
 		router.post('/meditations/end', [MeditationsController, 'end']).as('meditations.end')
 	})
 	.prefix('/api')
+	.use(middleware.auth())
+
+/*
+|--------------------------------------------------------------------------
+| SSE routes (Datastar real-time updates)
+|--------------------------------------------------------------------------
+*/
+router
+	.group(() => {
+		router.get('/updates', [SseController, 'updates']).as('sse.updates')
+	})
+	.prefix('/sse')
 	.use(middleware.auth())
