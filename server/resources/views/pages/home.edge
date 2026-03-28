@@ -6,11 +6,27 @@
 			Signed in as <strong style="color: #e4e4e7;">{{ user.email }}</strong>
 		</p>
 
-		<p style="text-align: center; color: #71717a; font-size: 0.875rem; margin-bottom: 1.5rem;">
+		<p style="text-align: center; color: #71717a; font-size: 0.875rem; margin-bottom: 2rem;">
 			Timezone: {{ user.timezone }}
 		</p>
 
-		<form method="POST" action="{{ route('auth.logout') }}">
+		<div class="download-links">
+			<p class="download-heading">Get the app</p>
+			<a href="#" class="download-btn">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+				iOS (App Store)
+			</a>
+			<a href="#" class="download-btn">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+				Android (Google Play)
+			</a>
+			<a href="#" class="download-btn">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+				Install PWA
+			</a>
+		</div>
+
+		<form method="POST" action="{{ route('auth.logout') }}" style="margin-top: 2rem;">
 			{{ csrfField() }}
 			<button type="submit" style="background: #27272a;">Sign out</button>
 		</form>
