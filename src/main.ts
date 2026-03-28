@@ -38,6 +38,9 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * 90; /* r=90 from SVG */
 ringProgress.style.strokeDasharray = `${RING_CIRCUMFERENCE}`;
 ringProgress.style.strokeDashoffset = `${RING_CIRCUMFERENCE}`;
 
+/* ── Build version ── */
+$("#version").textContent = __BUILD_ID__;
+
 /* ── Starfield ── */
 const starfieldEl = document.querySelector("#starfield") as HTMLCanvasElement;
 initStarfield(starfieldEl);
