@@ -3,6 +3,7 @@ import { middleware } from '#start/kernel'
 
 const AuthController = () => import('#controllers/auth_controller')
 const FriendsController = () => import('#controllers/friends_controller')
+const MeditationsController = () => import('#controllers/meditations_controller')
 
 /*
 |--------------------------------------------------------------------------
@@ -36,4 +37,17 @@ router
 		router.delete('/friends/:id', [FriendsController, 'destroy']).as('friends.destroy')
 		router.patch('/friends/:id/toggles', [FriendsController, 'updateToggles']).as('friends.toggles')
 	})
+	.use(middleware.auth())
+
+/*
+|--------------------------------------------------------------------------
+| API routes (JSON, called from the PWA)
+|--------------------------------------------------------------------------
+*/
+router
+	.group(() => {
+		router.post('/meditations/start', [MeditationsController, 'start']).as('meditations.start')
+		router.post('/meditations/end', [MeditationsController, 'end']).as('meditations.end')
+	})
+	.prefix('/api')
 	.use(middleware.auth())
