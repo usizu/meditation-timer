@@ -194,9 +194,15 @@ let dragStartX = 0;
 let dragStartY = 0;
 let dragStartTime = 0;
 let isDragging = false;
+let dragTarget = 0;
+let dragRafPending = false;
+
+function applyDragSeek(): void {
+	audio.seekDrag(dragTarget);
+	dragRafPending = false;
+}
 
 sessionView.addEventListener("touchstart", (e) => {
-	/* don't hijack button taps */
 	if ((e.target as Element).closest(".session-controls")) return;
 
 	const t = e.touches[0];
@@ -219,26 +225,34 @@ sessionView.addEventListener(
 		const dur = audio.getDuration();
 
 		/*
-		 * Horizontal: full viewport width = full duration  (coarse)
-		 * Vertical:   full viewport height = 1/3 duration  (precise)
-		 * Right / Down = forward, Left / Up = backward
+		 * Use whichever axis has the larger delta — prevents
+		 * cross-axis cancellation and feels natural.
+		 *
+		 * Horizontal: full viewport width  = full duration  (coarse)
+		 * Vertical:   full viewport height  = 2/3 duration  (finer)
+		 * Right / Down = forward,  Left / Up = backward
 		 */
-		const hDelta = (dx / window.innerWidth) * dur;
-		const vDelta = (dy / window.innerHeight) * (dur / 3);
+		const delta =
+			Math.abs(dx) >= Math.abs(dy)
+				? (dx / window.innerWidth) * dur
+				: (dy / window.innerHeight) * dur * 0.66;
 
-		/* clamp to 0.5s before the end so the audio never "ends" mid-drag */
-		const newTime = Math.max(
-			0,
-			Math.min(dur - 0.5, dragStartTime + hDelta + vDelta),
-		);
-		audio.seekTo(newTime);
+		dragTarget = Math.max(0, Math.min(dur - 0.5, dragStartTime + delta));
+
+		/* throttle to one seek per frame */
+		if (!dragRafPending) {
+			dragRafPending = true;
+			requestAnimationFrame(applyDragSeek);
+		}
 	},
 	{ passive: false },
 );
 
 sessionView.addEventListener("touchend", () => {
+	if (!isDragging) return;
 	isDragging = false;
 	sessionView.classList.remove("dragging");
+	audio.flushPositionState();
 });
 
 /* ── Wake lock reacquire ── */

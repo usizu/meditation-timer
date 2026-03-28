@@ -153,6 +153,18 @@ export function seekTo(timeSec: number): void {
 	onTickCb?.(audioEl.currentTime, audioEl.duration);
 }
 
+/** Lightweight seek for drag — skips MediaSession to avoid thrashing. */
+export function seekDrag(timeSec: number): void {
+	if (!audioEl || !Number.isFinite(audioEl.duration)) return;
+	audioEl.currentTime = Math.max(0, Math.min(timeSec, audioEl.duration));
+	onTickCb?.(audioEl.currentTime, audioEl.duration);
+}
+
+/** Sync MediaSession after a drag ends. */
+export function flushPositionState(): void {
+	updatePositionState();
+}
+
 export function seekBy(deltaSec: number): void {
 	if (!audioEl) return;
 	seekTo(audioEl.currentTime + deltaSec);
