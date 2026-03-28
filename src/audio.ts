@@ -252,3 +252,42 @@ export function playChime(): void {
 		osc.stop(now + 2.5);
 	}
 }
+
+/* ── Notification bell (friend started meditating) ── */
+
+/**
+ * A single singing-bowl strike via Web Audio API.
+ * Uses AudioContext so it never appears in lock screen controls.
+ *
+ * Fundamental + inharmonic partials give the metallic, bell-like
+ * decay characteristic of a singing bowl.
+ */
+export function playBell(): void {
+	const ctx = getAudioCtx();
+	const now = ctx.currentTime;
+
+	const partials = [
+		{ freq: 440, gain: 0.4, decay: 3.0 },   /* fundamental A4 */
+		{ freq: 880, gain: 0.15, decay: 2.0 },   /* octave */
+		{ freq: 1318, gain: 0.08, decay: 1.5 },  /* ~E6 (inharmonic) */
+		{ freq: 1864, gain: 0.04, decay: 1.0 },  /* metallic shimmer */
+	];
+
+	for (const p of partials) {
+		const osc = ctx.createOscillator();
+		const gain = ctx.createGain();
+
+		osc.type = "sine";
+		osc.frequency.setValueAtTime(p.freq, now);
+
+		gain.gain.setValueAtTime(0, now);
+		gain.gain.linearRampToValueAtTime(p.gain, now + 0.01);
+		gain.gain.exponentialRampToValueAtTime(0.001, now + p.decay);
+
+		osc.connect(gain);
+		gain.connect(ctx.destination);
+
+		osc.start(now);
+		osc.stop(now + p.decay);
+	}
+}
