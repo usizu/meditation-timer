@@ -4,6 +4,7 @@ import Meditation from '#models/meditation'
 import Friendship from '#models/friendship'
 import logger from '@adonisjs/core/services/logger'
 import sseManager from '#services/sse_manager'
+import PushService from '#services/push_service'
 
 export default class MeditationsController {
 	/**
@@ -43,9 +44,13 @@ export default class MeditationsController {
 			`<span id="friend-status-${userId}" class="meditating-indicator">meditating</span>`
 		)
 
-		/*
-		 * TODO Phase 5: Send web push notifications to friendsToNotify
-		 */
+		/* Send web push notifications to friends (non-blocking) */
+		const email = auth.user!.email
+		PushService.notifyUsers(friendIds, {
+			title: 'Kitty Timer',
+			body: `${email} started meditating`,
+			url: '/',
+		})
 
 		return response.json({
 			id: meditation.id,

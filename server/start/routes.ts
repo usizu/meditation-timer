@@ -5,6 +5,7 @@ const AuthController = () => import('#controllers/auth_controller')
 const FriendsController = () => import('#controllers/friends_controller')
 const MeditationsController = () => import('#controllers/meditations_controller')
 const SseController = () => import('#controllers/sse_controller')
+const PushSubscriptionsController = () => import('#controllers/push_subscriptions_controller')
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +50,10 @@ router
 	.group(() => {
 		router.post('/meditations/start', [MeditationsController, 'start']).as('meditations.start')
 		router.post('/meditations/end', [MeditationsController, 'end']).as('meditations.end')
+
+		router.get('/push/vapid-key', [PushSubscriptionsController, 'vapidKey']).as('push.vapidKey')
+		router.post('/push-subscriptions', [PushSubscriptionsController, 'store']).as('push.store')
+		router.delete('/push-subscriptions/:id', [PushSubscriptionsController, 'destroy']).as('push.destroy')
 	})
 	.prefix('/api')
 	.use(middleware.auth())

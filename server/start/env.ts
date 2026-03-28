@@ -33,4 +33,12 @@ export default await Env.create(new URL('../', import.meta.url), {
   APP_URL: Env.schema.string(),
   RESEND_API_KEY: Env.schema.string(),
   MAIL_FROM: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for Web Push (VAPID)
+  |----------------------------------------------------------
+  */
+  VAPID_PUBLIC_KEY: Env.schema.string.optional(),
+  VAPID_PRIVATE_KEY: Env.schema.string.optional(),
 })
