@@ -1,14 +1,13 @@
 /**
  * Audio module — the audio element is the source of truth for session time.
  *
- * A silent WAV matching the exact timer duration is generated so the
- * lockscreen progress bar, scrubber, and skip controls map 1:1 to the
- * meditation timer. The rAF loop polls audio.currentTime for smooth UI.
+ * A WAV matching the exact timer duration is generated with a completion
+ * chime baked into the last 3 seconds. Because the chime lives inside the
+ * audio file itself, it plays even from the lockscreen / background.
  */
 
 let audioEl: HTMLAudioElement | null = null;
 let audioUrl: string | null = null;
-let audioCtx: AudioContext | null = null;
 let rafId = 0;
 let lastPositionUpdate = 0;
 
@@ -17,7 +16,11 @@ let onEndedCb: (() => void) | null = null;
 let onPauseCb: (() => void) | null = null;
 let onPlayCb: (() => void) | null = null;
 
-/* ── Silent WAV generation ── */
+/* ── WAV generation ── */
+
+const CHIME_SECS = 3;
+const CHIME_FREQS = [523.25, 659.25, 783.99]; /* C5, E5, G5 */
+const SAMPLE_RATE = 8000;
 
 function writeStr(view: DataView, offset: number, str: string): void {
 	for (let i = 0; i < str.length; i++) {
@@ -26,18 +29,18 @@ function writeStr(view: DataView, offset: number, str: string): void {
 }
 
 /**
- * 8 kHz · 8-bit · mono — keeps blobs small:
- *   5 min ≈ 2.4 MB, 30 min ≈ 14 MB
- * 8-bit unsigned PCM silence = 128
+ * 8 kHz · 8-bit · mono WAV.
+ * Silence for most of the file, with a synthesised C-E-G chime
+ * in the final CHIME_SECS seconds.
  */
-function createSilentWav(durationSeconds: number): Blob {
-	const sampleRate = 8000;
-	const numSamples = Math.ceil(sampleRate * durationSeconds);
+function createSessionWav(durationSeconds: number): Blob {
+	const numSamples = Math.ceil(SAMPLE_RATE * durationSeconds);
 	const dataSize = numSamples;
 	const buf = new ArrayBuffer(44 + dataSize);
 	const v = new DataView(buf);
 	const bytes = new Uint8Array(buf);
 
+	/* header */
 	writeStr(v, 0, "RIFF");
 	v.setUint32(4, 36 + dataSize, true);
 	writeStr(v, 8, "WAVE");
@@ -45,14 +48,40 @@ function createSilentWav(durationSeconds: number): Blob {
 	v.setUint32(16, 16, true);
 	v.setUint16(20, 1, true); /* PCM */
 	v.setUint16(22, 1, true); /* mono */
-	v.setUint32(24, sampleRate, true);
-	v.setUint32(28, sampleRate, true); /* byteRate */
+	v.setUint32(24, SAMPLE_RATE, true);
+	v.setUint32(28, SAMPLE_RATE, true); /* byteRate */
 	v.setUint16(32, 1, true); /* blockAlign */
 	v.setUint16(34, 8, true); /* bitsPerSample */
 	writeStr(v, 36, "data");
 	v.setUint32(40, dataSize, true);
 
-	bytes.fill(128, 44); /* 128 = silence for unsigned 8-bit */
+	/* silence (128 = zero-crossing for unsigned 8-bit PCM) */
+	bytes.fill(128, 44);
+
+	/* chime in the last CHIME_SECS seconds */
+	const chimeSamples = Math.min(
+		Math.ceil(SAMPLE_RATE * CHIME_SECS),
+		numSamples,
+	);
+	const chimeStart = numSamples - chimeSamples;
+	const twoPi = 2 * Math.PI;
+	const amp = 55; /* ±55 from centre → range 73-183 */
+
+	for (let i = 0; i < chimeSamples; i++) {
+		const t = i / SAMPLE_RATE;
+		const attack = Math.min(1, t / 0.03);
+		const decay = Math.exp(-t * 1.3);
+		const env = attack * decay;
+
+		let sig = 0;
+		for (const f of CHIME_FREQS) {
+			sig += Math.sin(twoPi * f * t);
+		}
+		sig /= CHIME_FREQS.length;
+
+		const val = 128 + Math.round(sig * env * amp);
+		bytes[44 + chimeStart + i] = Math.max(0, Math.min(255, val));
+	}
 
 	return new Blob([buf], { type: "audio/wav" });
 }
@@ -90,11 +119,11 @@ export function create(
 	onPauseCb = cbs.onPause;
 	onPlayCb = cbs.onPlay;
 
-	const blob = createSilentWav(durationMinutes * 60);
+	const blob = createSessionWav(durationMinutes * 60);
 	audioUrl = URL.createObjectURL(blob);
 
 	audioEl = new Audio(audioUrl);
-	audioEl.volume = 0.01; /* near-silent — nonzero so OS treats as active */
+	audioEl.volume = 1;
 
 	audioEl.addEventListener("ended", () => onEndedCb?.());
 	audioEl.addEventListener("pause", () => {
@@ -138,7 +167,6 @@ export function getDuration(): number {
 }
 
 export function destroy(): void {
-	/* null callbacks before pausing so the pause-event handler is a no-op */
 	onTickCb = null;
 	onEndedCb = null;
 	onPauseCb = null;
@@ -219,36 +247,5 @@ function clearMediaSession(): void {
 	];
 	for (const a of actions) {
 		navigator.mediaSession.setActionHandler(a, null);
-	}
-}
-
-/* ── Completion chime ── */
-
-function getAudioCtx(): AudioContext {
-	if (!audioCtx) audioCtx = new AudioContext();
-	return audioCtx;
-}
-
-export function playChime(): void {
-	const ctx = getAudioCtx();
-	const now = ctx.currentTime;
-	const frequencies = [523.25, 659.25, 783.99]; /* C5, E5, G5 */
-
-	for (const freq of frequencies) {
-		const osc = ctx.createOscillator();
-		const gain = ctx.createGain();
-
-		osc.type = "sine";
-		osc.frequency.setValueAtTime(freq, now);
-
-		gain.gain.setValueAtTime(0, now);
-		gain.gain.linearRampToValueAtTime(0.15, now + 0.05);
-		gain.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
-
-		osc.connect(gain);
-		gain.connect(ctx.destination);
-
-		osc.start(now);
-		osc.stop(now + 2.5);
 	}
 }

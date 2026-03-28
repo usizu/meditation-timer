@@ -123,10 +123,6 @@ function onSessionComplete(completed: boolean): void {
 	audio.destroy();
 	releaseWakeLock();
 
-	if (completed) {
-		audio.playChime();
-	}
-
 	const elapsedMs = durationMs - remainingMs;
 	const elapsedMin = Math.round(elapsedMs / 60000);
 
@@ -149,8 +145,8 @@ for (const btn of presetBtns) {
 	btn.addEventListener("click", () => {
 		for (const b of presetBtns) b.classList.remove("active");
 		btn.classList.add("active");
-		customInput.value = "";
 		selectedMinutes = Number(btn.dataset.minutes);
+		customInput.value = String(selectedMinutes);
 	});
 }
 
@@ -190,6 +186,54 @@ stopBtn.addEventListener("click", () => {
 homeBtn.addEventListener("click", () => {
 	showView(homeView);
 	updateRing(0);
+});
+
+/* ── Touch-drag scrubbing ── */
+let dragStartX = 0;
+let dragStartY = 0;
+let dragStartTime = 0;
+let isDragging = false;
+
+sessionView.addEventListener("touchstart", (e) => {
+	/* don't hijack button taps */
+	if ((e.target as Element).closest(".session-controls")) return;
+
+	const t = e.touches[0];
+	dragStartX = t.clientX;
+	dragStartY = t.clientY;
+	dragStartTime = audio.getCurrentTime();
+	isDragging = true;
+	sessionView.classList.add("dragging");
+});
+
+sessionView.addEventListener(
+	"touchmove",
+	(e) => {
+		if (!isDragging) return;
+		e.preventDefault();
+
+		const t = e.touches[0];
+		const dx = t.clientX - dragStartX;
+		const dy = t.clientY - dragStartY;
+		const dur = audio.getDuration();
+
+		/*
+		 * Horizontal: full viewport width = full duration  (coarse)
+		 * Vertical:   full viewport height = 1/3 duration  (precise)
+		 * Right / Down = forward, Left / Up = backward
+		 */
+		const hDelta = (dx / window.innerWidth) * dur;
+		const vDelta = (dy / window.innerHeight) * (dur / 3);
+
+		const newTime = Math.max(0, Math.min(dur, dragStartTime + hDelta + vDelta));
+		audio.seekTo(newTime);
+	},
+	{ passive: false },
+);
+
+sessionView.addEventListener("touchend", () => {
+	isDragging = false;
+	sessionView.classList.remove("dragging");
 });
 
 /* ── Wake lock reacquire ── */

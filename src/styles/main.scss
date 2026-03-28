@@ -84,9 +84,10 @@ body {
 
 .duration-presets {
 	display: flex;
-	gap: 0.5rem;
+	gap: 0.4rem;
 	flex-wrap: wrap;
 	justify-content: center;
+	max-width: 22rem;
 }
 
 .preset {
@@ -230,6 +231,20 @@ body {
 
 .ring-progress {
 	transition: stroke-dashoffset 0.3s linear;
+
+	.dragging & {
+		transition: none;
+	}
+}
+
+/* scrub drag active state */
+.dragging .timer-display span {
+	color: $accent;
+	transition: color 0.15s ease;
+}
+
+.dragging .ring-progress {
+	filter: url(#glow) brightness(1.3);
 }
 
 .timer-display {
