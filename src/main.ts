@@ -96,6 +96,7 @@ function startSession(): void {
 			timer.handleTick(curSec, durSec);
 		},
 		onEnded() {
+			if (isDragging) return;
 			timer.handleComplete();
 		},
 		onPause() {
@@ -225,7 +226,11 @@ sessionView.addEventListener(
 		const hDelta = (dx / window.innerWidth) * dur;
 		const vDelta = (dy / window.innerHeight) * (dur / 3);
 
-		const newTime = Math.max(0, Math.min(dur, dragStartTime + hDelta + vDelta));
+		/* clamp to 0.5s before the end so the audio never "ends" mid-drag */
+		const newTime = Math.max(
+			0,
+			Math.min(dur - 0.5, dragStartTime + hDelta + vDelta),
+		);
 		audio.seekTo(newTime);
 	},
 	{ passive: false },
