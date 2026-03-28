@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+		<meta name="theme-color" content="#0a0a1a" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<title>Cosmic Timer</title>
+		<link rel="icon" href="/icon-192.svg" />
+		<link rel="apple-touch-icon" href="/icon-192.svg" />
+	</head>
+	<body>
+		<div id="app">
+			<canvas id="starfield"></canvas>
+
+			<div id="home-view" class="view active">
+				<div class="home-content">
+					<h1 class="title">Cosmic Timer</h1>
+					<p class="subtitle">Find stillness among the stars</p>
+
+					<div class="duration-presets">
+						<button type="button" class="preset active" data-minutes="5">5m</button>
+						<button type="button" class="preset" data-minutes="10">10m</button>
+						<button type="button" class="preset" data-minutes="15">15m</button>
+						<button type="button" class="preset" data-minutes="20">20m</button>
+						<button type="button" class="preset" data-minutes="30">30m</button>
+					</div>
+
+					<div class="custom-duration">
+						<label for="custom-minutes">Custom</label>
+						<div class="stepper">
+							<button type="button" class="stepper-btn stepper-btn--dec" aria-label="Decrease minutes">&minus;</button>
+							<input
+								type="number"
+								id="custom-minutes"
+								min="1"
+								max="180"
+								placeholder="min"
+								inputmode="numeric"
+							/>
+							<button type="button" class="stepper-btn stepper-btn--inc" aria-label="Increase minutes">&plus;</button>
+						</div>
+					</div>
+
+					<button type="button" id="start-btn" class="glow-btn">Begin</button>
+				</div>
+			</div>
+
+			<div id="session-view" class="view">
+				<div class="session-content">
+					<div class="timer-ring-container">
+						<svg class="timer-ring" viewBox="0 0 200 200" role="img" aria-label="Meditation timer progress">
+							<defs>
+								<linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+									<stop offset="0%" stop-color="#7b5ea7" />
+									<stop offset="50%" stop-color="#00e5ff" />
+									<stop offset="100%" stop-color="#7b5ea7" />
+								</linearGradient>
+								<filter id="glow">
+									<feGaussianBlur stdDeviation="3" result="blur" />
+									<feMerge>
+										<feMergeNode in="blur" />
+										<feMergeNode in="SourceGraphic" />
+									</feMerge>
+								</filter>
+							</defs>
+							<circle
+								class="ring-bg"
+								cx="100"
+								cy="100"
+								r="90"
+								fill="none"
+								stroke="rgba(123, 94, 167, 0.15)"
+								stroke-width="4"
+							/>
+							<circle
+								id="ring-progress"
+								class="ring-progress"
+								cx="100"
+								cy="100"
+								r="90"
+								fill="none"
+								stroke="url(#ring-gradient)"
+								stroke-width="4"
+								stroke-linecap="round"
+								filter="url(#glow)"
+								transform="rotate(-90 100 100)"
+							/>
+						</svg>
+						<div class="timer-display">
+							<span id="timer-text">05:00</span>
+						</div>
+						<div class="breath-ring"></div>
+					</div>
+
+					<div class="session-controls">
+						<button type="button" id="pause-btn" class="control-btn">Pause</button>
+						<button type="button" id="stop-btn" class="control-btn control-btn--stop">End</button>
+					</div>
+				</div>
+			</div>
+
+			<div id="done-view" class="view">
+				<div class="done-content">
+					<div class="done-icon">&#10024;</div>
+					<h2 class="done-title">Session Complete</h2>
+					<p id="done-summary" class="done-summary"></p>
+					<button type="button" id="home-btn" class="glow-btn">Return</button>
+				</div>
+			</div>
+		</div>
+
+		<script type="module" src="/src/main.ts"></script>
+	</body>
+</html>

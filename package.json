@@ -1,0 +1,17 @@
+{
+	"name": "cosmic-timer",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"devDependencies": {
+		"sass": "^1.98.0",
+		"typescript": "^6.0.2",
+		"vite": "^8.0.3",
+		"vite-plugin-pwa": "^1.2.0"
+	}
+}
