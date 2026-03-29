@@ -1,5 +1,7 @@
 import * as audio from "./audio";
+import * as api from "./api";
 import { initStarfield } from "./canvas";
+import { setupPushNotifications } from "./push";
 import { saveSession } from "./storage";
 import type { TimerState } from "./timer";
 import { Timer } from "./timer";
@@ -91,6 +93,9 @@ function startSession(): void {
 	updateDisplay(selectedMinutes * 60 * 1000);
 	updateRing(0);
 
+	/* Notify server (non-blocking, respects silent mode) */
+	api.meditationStart();
+
 	audio.create(selectedMinutes, {
 		onTick(curSec, durSec) {
 			timer.handleTick(curSec, durSec);
@@ -122,6 +127,9 @@ function onSessionComplete(completed: boolean): void {
 
 	audio.destroy();
 	releaseWakeLock();
+
+	/* Notify server (non-blocking) */
+	api.meditationEnd();
 
 	if (completed) {
 		audio.playChime();
@@ -194,3 +202,6 @@ homeBtn.addEventListener("click", () => {
 
 /* ── Wake lock reacquire ── */
 setupWakeLockReacquire(() => timer.getState() === "running");
+
+/* ── Push notifications ── */
+setupPushNotifications();

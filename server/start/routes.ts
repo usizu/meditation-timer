@@ -6,6 +6,7 @@ const FriendsController = () => import('#controllers/friends_controller')
 const MeditationsController = () => import('#controllers/meditations_controller')
 const SseController = () => import('#controllers/sse_controller')
 const PushSubscriptionsController = () => import('#controllers/push_subscriptions_controller')
+const ProfileController = () => import('#controllers/profile_controller')
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,9 @@ router
 		router.get('/', async ({ view, auth }) => {
 			return view.render('pages/home', { user: auth.user })
 		}).as('home')
+
+		router.get('/profile', [ProfileController, 'show']).as('profile.show')
+		router.post('/profile', [ProfileController, 'update']).as('profile.update')
 
 		router.get('/friends', [FriendsController, 'index']).as('friends.index')
 		router.post('/friends', [FriendsController, 'store']).as('friends.store')

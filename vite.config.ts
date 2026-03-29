@@ -5,6 +5,9 @@ export default defineConfig({
 	plugins: [
 		VitePWA({
 			registerType: "autoUpdate",
+			strategies: "injectManifest",
+			srcDir: "src",
+			filename: "sw.ts",
 			manifest: {
 				name: "Cosmic Timer",
 				short_name: "Cosmic Timer",
@@ -21,7 +24,7 @@ export default defineConfig({
 					},
 				],
 			},
-			workbox: {
+			injectManifest: {
 				globPatterns: ["**/*.{js,css,html,png,svg,woff2}"],
 			},
 		}),
