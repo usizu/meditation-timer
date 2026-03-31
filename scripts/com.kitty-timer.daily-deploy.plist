@@ -23,7 +23,7 @@
 
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Users/aks/Projects/Code/vibe-coded/cosmic-timer/scripts/deploy-ios.sh</string>
+		<string>/Users/aks/Projects/Code/vibe-coded/kitty-timer/scripts/deploy-ios.sh</string>
 	</array>
 
 	<!-- Run daily at 7:00 AM -->
@@ -36,10 +36,10 @@
 	</dict>
 
 	<key>StandardOutPath</key>
-	<string>/Users/aks/Projects/Code/vibe-coded/cosmic-timer/scripts/deploy-stdout.log</string>
+	<string>/Users/aks/Projects/Code/vibe-coded/kitty-timer/scripts/deploy-stdout.log</string>
 
 	<key>StandardErrorPath</key>
-	<string>/Users/aks/Projects/Code/vibe-coded/cosmic-timer/scripts/deploy-stderr.log</string>
+	<string>/Users/aks/Projects/Code/vibe-coded/kitty-timer/scripts/deploy-stderr.log</string>
 
 	<!-- Ensure PATH includes Homebrew, pnpm, Xcode CLI tools -->
 	<key>EnvironmentVariables</key>

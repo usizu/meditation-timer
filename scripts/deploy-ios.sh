@@ -45,6 +45,10 @@ CAP=1 pnpm exec vite build 2>&1 | tee -a "$LOG_FILE"
 log "Syncing to iOS..."
 pnpm exec cap sync ios 2>&1 | tee -a "$LOG_FILE"
 
+# ── Clean stale DerivedData ─────────────────────────────────────────
+log "Cleaning DerivedData..."
+rm -rf "$PROJECT_DIR/ios/DerivedData" "$PROJECT_DIR/ios/App/DerivedData"
+
 # ── Build native app ────────────────────────────────────────────────
 log "Building Xcode project..."
 xcodebuild \
@@ -54,7 +58,7 @@ xcodebuild \
 	-configuration Debug \
 	-allowProvisioningUpdates \
 	-derivedDataPath "$PROJECT_DIR/ios/DerivedData" \
-	build 2>&1 | tail -5 | tee -a "$LOG_FILE"
+	build 2>&1 | tee -a "$LOG_FILE"
 
 # ── Install on device ───────────────────────────────────────────────
 APP_PATH=$(find "$PROJECT_DIR/ios/DerivedData/Build/Products/Debug-iphoneos" \

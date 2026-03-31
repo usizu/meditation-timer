@@ -1,0 +1,9 @@
+[
+	{
+		"label": "Deploy iOS",
+		"command": "./scripts/deploy-ios.sh",
+		"use_new_terminal": true,
+		"allow_concurrent_runs": false,
+		"reveal": "always"
+	}
+]
