@@ -25,6 +25,7 @@ export default defineConfig(({ command }) => {
 
 	/* Capacitor builds serve from local files — use relative base */
 	const isCap = !!process.env.CAP;
+	const isDev = command === "serve";
 
 	/* PWA plugin not needed for native Capacitor builds */
 	const plugins: PluginOption[] = [];
@@ -33,8 +34,8 @@ export default defineConfig(({ command }) => {
 			VitePWA({
 				registerType: "autoUpdate",
 				manifest: {
-					name: "Kitty Timer",
-					short_name: "Kitty Timer",
+					name: isDev ? "Kitty [Dev]" : "Kitty Timer",
+					short_name: isDev ? "Kitty [Dev]" : "Kitty Timer",
 					description: "A kitty meditation timer",
 					theme_color: "#1a0e2e",
 					background_color: "#1a0e2e",
@@ -72,5 +73,10 @@ export default defineConfig(({ command }) => {
 			__BUILD_ID__: JSON.stringify(`v${version}`),
 		},
 		plugins,
+		server: {
+			//...
+			host: "0.0.0.0", // necessary to allow connections from other machines
+			allowedHosts: true, //["sen-air.local"], // computer's host name
+		},
 	};
 });

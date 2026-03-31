@@ -1,7 +1,13 @@
 import * as audio from "./audio";
 import { initStarfield } from "./canvas";
 import * as haptics from "./haptics";
-import { loadDuration, saveDuration, saveSession } from "./storage";
+import {
+	getDailyMinutes,
+	incrementDailyMinute,
+	loadDuration,
+	saveDuration,
+	saveSession,
+} from "./storage";
 import type { TimerState } from "./timer";
 import { Timer } from "./timer";
 import {
@@ -31,6 +37,7 @@ const stopBtn = $("#stop-btn");
 
 const doneSummary = $("#done-summary");
 const homeBtn = $("#home-btn");
+const dailyMinutesEl = $("#daily-minutes");
 
 /* ── State ── */
 let selectedMinutes = loadDuration();
@@ -41,6 +48,30 @@ ringProgress.style.strokeDashoffset = `${RING_CIRCUMFERENCE}`;
 
 /* ── Build version ── */
 $("#version").textContent = __BUILD_ID__;
+
+/* ── Daily meditation counter ── */
+let dailyCounterInterval: ReturnType<typeof setInterval> | null = null;
+
+function updateDailyDisplay(): void {
+	dailyMinutesEl.textContent = String(getDailyMinutes());
+}
+
+function startDailyCounter(): void {
+	stopDailyCounter();
+	dailyCounterInterval = setInterval(() => {
+		const mins = incrementDailyMinute();
+		dailyMinutesEl.textContent = String(mins);
+	}, 60_000);
+}
+
+function stopDailyCounter(): void {
+	if (dailyCounterInterval !== null) {
+		clearInterval(dailyCounterInterval);
+		dailyCounterInterval = null;
+	}
+}
+
+updateDailyDisplay();
 
 /* ── Starfield ── */
 const starfieldEl = document.querySelector("#starfield") as HTMLCanvasElement;
@@ -122,6 +153,7 @@ function startSession(): void {
 	audio.play();
 	timer.setState("running");
 	requestWakeLock();
+	startDailyCounter();
 }
 
 function onSessionComplete(completed: boolean): void {
@@ -131,6 +163,8 @@ function onSessionComplete(completed: boolean): void {
 	/* don't destroy audio here — chime may still be playing through
 	   the same element. Cleanup happens on next create() or home nav. */
 	releaseWakeLock();
+	stopDailyCounter();
+	updateDailyDisplay();
 
 	const elapsedMs = durationMs - remainingMs;
 	const elapsedMin = Math.round(elapsedMs / 60000);
@@ -205,6 +239,8 @@ stopBtn.addEventListener("click", () => {
 	haptics.tapMedium();
 	audio.destroy();
 	releaseWakeLock();
+	stopDailyCounter();
+	updateDailyDisplay();
 	sessionView.classList.remove("paused");
 	showView(homeView);
 	updateRing(0);
@@ -213,6 +249,7 @@ stopBtn.addEventListener("click", () => {
 homeBtn.addEventListener("click", () => {
 	haptics.tapLight();
 	audio.destroy();
+	updateDailyDisplay();
 	showView(homeView);
 	updateRing(0);
 });
@@ -395,48 +432,50 @@ sessionView.addEventListener("touchend", () => {
 });
 
 /* ── Dev bar — drag sensitivity tuning (H / V) ── */
-const devBar = document.createElement("div");
-devBar.className = "dev-bar";
-const sensValues = [0.5, 0.75, 1, 1.25, 1.5, 2];
+if (import.meta.env.DEV) {
+	const devBar = document.createElement("div");
+	devBar.className = "dev-bar";
+	const sensValues = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-function makeRow(
-	label: string,
-	current: number,
-	onSet: (v: number) => void,
-): HTMLDivElement {
-	const row = document.createElement("div");
-	row.className = "dev-row";
-	const lbl = document.createElement("span");
-	lbl.textContent = label;
-	row.appendChild(lbl);
-	for (const s of sensValues) {
-		const btn = document.createElement("button");
-		btn.textContent = `${s}`;
-		if (s === current) btn.classList.add("active");
-		btn.addEventListener("click", () => {
-			onSet(s);
-			for (const b of row.querySelectorAll("button")) {
-				b.classList.remove("active");
-			}
-			btn.classList.add("active");
-			haptics.tapLight();
-		});
-		row.appendChild(btn);
+	function makeRow(
+		label: string,
+		current: number,
+		onSet: (v: number) => void,
+	): HTMLDivElement {
+		const row = document.createElement("div");
+		row.className = "dev-row";
+		const lbl = document.createElement("span");
+		lbl.textContent = label;
+		row.appendChild(lbl);
+		for (const s of sensValues) {
+			const btn = document.createElement("button");
+			btn.textContent = `${s}`;
+			if (s === current) btn.classList.add("active");
+			btn.addEventListener("click", () => {
+				onSet(s);
+				for (const b of row.querySelectorAll("button")) {
+					b.classList.remove("active");
+				}
+				btn.classList.add("active");
+				haptics.tapLight();
+			});
+			row.appendChild(btn);
+		}
+		return row;
 	}
-	return row;
-}
 
-devBar.appendChild(
-	makeRow("H", DRAG_SENS_X, (v) => {
-		DRAG_SENS_X = v;
-	}),
-);
-devBar.appendChild(
-	makeRow("V", DRAG_SENS_Y, (v) => {
-		DRAG_SENS_Y = v;
-	}),
-);
-document.getElementById("app")?.appendChild(devBar);
+	devBar.appendChild(
+		makeRow("H", DRAG_SENS_X, (v) => {
+			DRAG_SENS_X = v;
+		}),
+	);
+	devBar.appendChild(
+		makeRow("V", DRAG_SENS_Y, (v) => {
+			DRAG_SENS_Y = v;
+		}),
+	);
+	sessionView.appendChild(devBar);
+}
 
 /* ── Wake lock reacquire ── */
 setupWakeLockReacquire(() => timer.getState() === "running");
