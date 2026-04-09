@@ -16,10 +16,12 @@ export default class ApiAuthMiddleware {
 
 			if (record) {
 				/*
-				 * Log the user in via the session guard so that ctx.auth.user
-				 * is populated for all downstream controllers.
+				 * Log the user in via the session guard and then authenticate
+				 * so that ctx.auth.user is populated for downstream controllers.
+				 * login() alone only sets ctx.auth.use('web').user, not ctx.auth.user.
 				 */
 				await ctx.auth.use('web').login(record.user)
+				await ctx.auth.authenticateUsing(['web'])
 				return next()
 			}
 		}
