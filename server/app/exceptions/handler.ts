@@ -34,6 +34,12 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * response to the client
    */
   async handle(error: unknown, ctx: HttpContext) {
+    /* Return JSON errors for API routes instead of rendering Edge pages */
+    if (ctx.request.url().startsWith('/api/')) {
+      const status = (error as any)?.status || 500
+      const message = (error as any)?.message || 'Internal server error'
+      return ctx.response.status(status).json({ error: message, status })
+    }
     return super.handle(error, ctx)
   }
 

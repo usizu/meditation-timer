@@ -7,6 +7,9 @@ const MeditationsController = () => import('#controllers/meditations_controller'
 const SseController = () => import('#controllers/sse_controller')
 const PushSubscriptionsController = () => import('#controllers/push_subscriptions_controller')
 const ProfileController = () => import('#controllers/profile_controller')
+const ApiAuthController = () => import('#controllers/api_auth_controller')
+const ApiFriendsController = () => import('#controllers/api_friends_controller')
+const ApiProfileController = () => import('#controllers/api_profile_controller')
 
 /*
 |--------------------------------------------------------------------------
@@ -52,15 +55,34 @@ router
 */
 router
 	.group(() => {
-		router.post('/meditations/start', [MeditationsController, 'start']).as('meditations.start')
-		router.post('/meditations/end', [MeditationsController, 'end']).as('meditations.end')
+		/* Auth — login/verify are public, logout/check need auth */
+		router.post('/auth/login', [ApiAuthController, 'login'])
+		router.post('/auth/verify', [ApiAuthController, 'verify'])
+		router.post('/auth/logout', [ApiAuthController, 'logout']).use(middleware.apiAuth())
+		router.get('/auth/check', [ApiAuthController, 'check']).use(middleware.apiAuth())
 
-		router.get('/push/vapid-key', [PushSubscriptionsController, 'vapidKey']).as('push.vapidKey')
-		router.post('/push-subscriptions', [PushSubscriptionsController, 'store']).as('push.store')
-		router.delete('/push-subscriptions/:id', [PushSubscriptionsController, 'destroy']).as('push.destroy')
+		/* Friends */
+		router.get('/friends', [ApiFriendsController, 'index']).use(middleware.apiAuth())
+		router.post('/friends', [ApiFriendsController, 'store']).use(middleware.apiAuth())
+		router.delete('/friends/:id', [ApiFriendsController, 'destroy']).use(middleware.apiAuth())
+		router
+			.patch('/friends/:id/toggles', [ApiFriendsController, 'updateToggles'])
+			.use(middleware.apiAuth())
+
+		/* Profile */
+		router.get('/profile', [ApiProfileController, 'show']).use(middleware.apiAuth())
+		router.post('/profile', [ApiProfileController, 'update']).use(middleware.apiAuth())
+
+		/* Meditations + Push (existing, switched to apiAuth) */
+		router.post('/meditations/start', [MeditationsController, 'start']).use(middleware.apiAuth())
+		router.post('/meditations/end', [MeditationsController, 'end']).use(middleware.apiAuth())
+		router.get('/push/vapid-key', [PushSubscriptionsController, 'vapidKey']).use(middleware.apiAuth())
+		router.post('/push-subscriptions', [PushSubscriptionsController, 'store']).use(middleware.apiAuth())
+		router
+			.delete('/push-subscriptions/:id', [PushSubscriptionsController, 'destroy'])
+			.use(middleware.apiAuth())
 	})
 	.prefix('/api')
-	.use(middleware.auth())
 
 /*
 |--------------------------------------------------------------------------

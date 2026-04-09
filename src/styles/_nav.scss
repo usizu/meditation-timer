@@ -1,0 +1,27 @@
+@use "variables" as *;
+
+.nav-icons {
+	display: flex;
+	gap: 0.75rem;
+	justify-content: flex-end;
+	margin-bottom: 0.5rem;
+}
+
+.nav-btn {
+	background: rgba($primary, 0.12);
+	border: 1px solid rgba($primary, 0.25);
+	border-radius: 50%;
+	width: 2.5rem;
+	height: 2.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: $primary;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:active {
+		transform: scale(0.92);
+		background: rgba($primary, 0.25);
+	}
+}

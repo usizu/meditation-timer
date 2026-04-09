@@ -1,5 +1,9 @@
 @use "sass:color";
 @use "variables" as *;
+@use "nav";
+@use "login";
+@use "friends";
+@use "profile";
 
 *,
 *::before,
@@ -38,6 +42,7 @@ body {
 	inset: 0;
 	z-index: 0;
 	pointer-events: none;
+	opacity: 0.1;
 }
 
 /* ── Views ── */
@@ -102,11 +107,11 @@ body {
 }
 
 .preset {
-	background: rgba($primary, 0.1);
-	border: 1px solid rgba($primary, 0.3);
-	color: $text;
-	padding: 0.6rem 1.2rem;
-	border-radius: 2rem;
+	background: rgb(160 117 202 / 43%);
+	border: 1px solid rgba(203, 150, 254, 0.3);
+	color: #f5eaf0;
+	padding: 4px 12px;
+	border-radius: 6px;
 	font-size: 0.95rem;
 	cursor: pointer;
 	transition: all 0.25s ease;
@@ -199,7 +204,11 @@ body {
 }
 
 .glow-btn {
-	background: linear-gradient(135deg, $primary, color.adjust($primary, $lightness: -10%));
+	background: linear-gradient(
+		135deg,
+		$primary,
+		color.adjust($primary, $lightness: -10%)
+	);
 	border: none;
 	color: $bg;
 	font-weight: 500;
@@ -213,7 +222,9 @@ body {
 	margin-top: 0.5rem;
 
 	&:hover {
-		box-shadow: 0 0 30px $glow-purple, 0 0 60px rgba($primary, 0.2);
+		box-shadow:
+			0 0 30px $glow-purple,
+			0 0 60px rgba($primary, 0.2);
 		transform: scale(1.03);
 	}
 
@@ -480,6 +491,41 @@ body {
 	color: rgba($text, 0.2);
 	padding-bottom: 0.4rem;
 	pointer-events: none;
+}
+
+/* ── Shared components ── */
+
+.back-btn {
+	align-self: flex-start;
+	background: none;
+	border: none;
+	color: $text-dim;
+	font-size: 0.9rem;
+	cursor: pointer;
+	padding: 0.25rem 0;
+	margin-bottom: 1rem;
+
+	&:active {
+		color: $primary;
+	}
+}
+
+.hidden {
+	display: none !important;
+}
+
+.glow-btn--sm {
+	padding: 0.5rem 1.2rem;
+	font-size: 0.85rem;
+}
+
+.glow-btn--danger {
+	background: linear-gradient(
+		135deg,
+		$pink,
+		color.adjust($pink, $lightness: -12%)
+	);
+	box-shadow: 0 0 15px rgba($pink, 0.3);
 }
 
 /* ── Utilities ── */

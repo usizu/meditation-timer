@@ -72,14 +72,22 @@ export default defineConfig(({ command }) => {
 
 	return {
 		base: isCap ? "./" : "/meditation-timer/",
+
+		css: {
+			devSourcemap: true,
+		},
 		define: {
 			__BUILD_ID__: JSON.stringify(`v${version}`),
+			__API_BASE__: JSON.stringify(isCap ? "https://mugen.usizu.xyz" : ""),
 		},
 		plugins,
 		server: {
-			//...
-			host: "0.0.0.0", // necessary to allow connections from other machines
-			allowedHosts: true, //["sen-air.local"], // computer's host name
+			host: "0.0.0.0",
+			allowedHosts: true,
+			proxy: {
+				"/api": "http://localhost:3333",
+				"/auth": "http://localhost:3333",
+			},
 		},
 	};
 });

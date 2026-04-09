@@ -2,8 +2,8 @@ import * as audio from "./audio";
 import { initStarfield } from "./canvas";
 import * as haptics from "./haptics";
 import {
+	addDailyMinutes,
 	getDailyMinutes,
-	incrementDailyMinute,
 	loadDuration,
 	saveDuration,
 	saveSession,
@@ -17,6 +17,11 @@ import {
 } from "./wakelock";
 import "./styles/main.scss";
 import * as api from "./api";
+import { checkAuth } from "./auth";
+import { initFriends, loadFriends } from "./friends";
+import { initLogin } from "./login";
+import { initBackButtons, navigateTo, showViewEl } from "./nav";
+import { initProfile } from "./profile";
 import { setupPushNotifications } from "./push";
 
 /* ── Elements ── */
@@ -44,47 +49,15 @@ const dailyMinutesEl = $("#daily-minutes");
 /* ── State ── */
 let selectedMinutes = loadDuration();
 const RING_CIRCUMFERENCE = 2 * Math.PI * 90; /* r=90 from SVG */
-
-ringProgress.style.strokeDasharray = `${RING_CIRCUMFERENCE}`;
-ringProgress.style.strokeDashoffset = `${RING_CIRCUMFERENCE}`;
-
-/* ── Build version ── */
-$("#version").textContent = __BUILD_ID__;
-
-/* ── Daily meditation counter ── */
-let dailyCounterInterval: ReturnType<typeof setInterval> | null = null;
-
 function updateDailyDisplay(): void {
 	dailyMinutesEl.textContent = String(getDailyMinutes());
 }
-
-function startDailyCounter(): void {
-	stopDailyCounter();
-	dailyCounterInterval = setInterval(() => {
-		const mins = incrementDailyMinute();
-		dailyMinutesEl.textContent = String(mins);
-	}, 60_000);
-}
-
-function stopDailyCounter(): void {
-	if (dailyCounterInterval !== null) {
-		clearInterval(dailyCounterInterval);
-		dailyCounterInterval = null;
-	}
-}
-
-updateDailyDisplay();
-
-/* ── Starfield ── */
 const starfieldEl = document.querySelector("#starfield") as HTMLCanvasElement;
 initStarfield(starfieldEl);
 
 /* ── View transitions ── */
 function showView(view: HTMLElement): void {
-	for (const v of [homeView, sessionView, doneView]) {
-		v.classList.remove("active");
-	}
-	view.classList.add("active");
+	showViewEl(view);
 }
 
 /* ── Timer ── */
@@ -158,24 +131,24 @@ function startSession(): void {
 	audio.play();
 	timer.setState("running");
 	requestWakeLock();
-	startDailyCounter();
 }
 
 function onSessionComplete(completed: boolean): void {
 	const remainingMs = timer.getRemainingMs();
 	const durationMs = timer.getDurationMs();
 
-	/* don't destroy audio here — chime may still be playing through
-	   the same element. Cleanup happens on next create() or home nav. */
+	if (!completed) audio.destroy();
 	releaseWakeLock();
-	stopDailyCounter();
-	updateDailyDisplay();
+	sessionView.classList.remove("paused");
 
 	/* Notify server (non-blocking) */
 	api.meditationEnd();
 
 	const elapsedMs = durationMs - remainingMs;
 	const elapsedMin = Math.round(elapsedMs / 60000);
+
+	addDailyMinutes(elapsedMin);
+	updateDailyDisplay();
 
 	saveSession({
 		date: new Date().toISOString(),
@@ -245,13 +218,7 @@ pauseBtn.addEventListener("click", () => {
 
 stopBtn.addEventListener("click", () => {
 	haptics.tapMedium();
-	audio.destroy();
-	releaseWakeLock();
-	stopDailyCounter();
-	updateDailyDisplay();
-	sessionView.classList.remove("paused");
-	showView(homeView);
-	updateRing(0);
+	onSessionComplete(false);
 });
 
 homeBtn.addEventListener("click", () => {
@@ -490,3 +457,23 @@ setupWakeLockReacquire(() => timer.getState() === "running");
 
 /* ── Push notifications ── */
 setupPushNotifications();
+
+/* ── Social features (friends, profile, login) ── */
+initBackButtons();
+initLogin();
+initFriends();
+initProfile();
+
+$("#friends-nav-btn").addEventListener("click", () => {
+	haptics.tapLight();
+	navigateTo("friends-view");
+	loadFriends();
+});
+
+$("#profile-nav-btn").addEventListener("click", () => {
+	haptics.tapLight();
+	navigateTo("profile-view");
+});
+
+/* Silent auth check — populate user cache, don't block timer */
+checkAuth();

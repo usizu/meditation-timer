@@ -1,6 +1,6 @@
 {
 	"name": "kitty-timer",
-	"version": "1.0.40",
+	"version": "1.0.45",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -10,7 +10,15 @@
 		"build": "vite build",
 		"build:ios": "CAP=1 vite build && cap sync ios",
 		"preview": "vite preview",
-		"cap": "cap"
+		"cap": "cap",
+		"migrate": "cd server && node ace migration:run",
+		"migrate:rollback": "cd server && node ace migration:rollback",
+		"migrate:fresh": "cd server && node ace migration:fresh",
+		"db:seed": "cd server && node ace db:seed",
+		"server:build": "cd server && node ace build",
+		"lint": "oxlint . && biome check .",
+		"typecheck": "tsgo --noEmit",
+		"typecheck:server": "cd server && tsgo --noEmit"
 	},
 	"devDependencies": {
 		"@capacitor/cli": "^8.3.0",

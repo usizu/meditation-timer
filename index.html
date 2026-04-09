@@ -19,6 +19,23 @@
 				<div class="home-content">
 					<h1 class="title">Kitty Timer</h1>
 
+					<div class="nav-icons">
+						<button type="button" id="friends-nav-btn" class="nav-btn" aria-label="Friends">
+							<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+								<circle cx="9" cy="7" r="4"/>
+								<path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+								<path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+							</svg>
+						</button>
+						<button type="button" id="profile-nav-btn" class="nav-btn" aria-label="Profile">
+							<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="8" r="4"/>
+								<path d="M20 21a8 8 0 1 0-16 0"/>
+							</svg>
+						</button>
+					</div>
+
 					<div class="home-controls">
 					<div class="duration-presets">
 						<button type="button" class="preset active" data-minutes="5">5m</button>
@@ -118,7 +135,79 @@
 					<button type="button" id="home-btn" class="glow-btn">Return</button>
 				</div>
 			</div>
-			<span id="version" class="version"></span>
+			<div id="login-view" class="view">
+				<div class="login-content">
+					<button type="button" class="back-btn" data-back="home">&#8592; Back</button>
+					<h2 class="login-title">Sign In</h2>
+					<p class="login-subtitle">Enter your email to receive a login code.</p>
+
+					<form id="login-email-form" class="login-form">
+						<input type="email" id="login-email" placeholder="you@email.com" required autocomplete="email" />
+						<button type="submit" class="glow-btn">Send Code</button>
+					</form>
+
+					<form id="login-code-form" class="login-form hidden">
+						<p class="login-check-email">Check your email for a 6-digit code.</p>
+						<input type="text" id="login-code" placeholder="123456" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
+						<button type="submit" class="glow-btn">Verify</button>
+					</form>
+
+					<p id="login-error" class="login-error hidden"></p>
+				</div>
+			</div>
+
+				<div id="friends-view" class="view">
+					<div class="friends-content">
+						<button type="button" class="back-btn" data-back="home">&#8592; Back</button>
+						<h2 class="friends-title">Friends</h2>
+
+						<form id="add-friend-form" class="add-friend-form">
+							<input type="email" id="add-friend-email" placeholder="friend@email.com" required autocomplete="email" />
+							<button type="submit" class="glow-btn glow-btn--sm">Add</button>
+						</form>
+						<p id="friend-msg" class="friend-msg hidden"></p>
+
+						<div id="pending-received" class="friend-section hidden">
+							<h3>Requests Received</h3>
+							<div id="pending-received-list" class="friend-list"></div>
+						</div>
+
+						<div id="pending-sent" class="friend-section hidden">
+							<h3>Requests Sent</h3>
+							<div id="pending-sent-list" class="friend-list"></div>
+						</div>
+
+						<div id="friends-list-section" class="friend-section">
+							<h3>Your Friends</h3>
+							<div id="friends-list" class="friend-list">
+								<p class="empty-state">No friends yet. Add someone above!</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div id="profile-view" class="view">
+					<div class="profile-content">
+						<button type="button" class="back-btn" data-back="home">&#8592; Back</button>
+						<h2 class="profile-title">Profile</h2>
+
+						<div class="profile-info">
+							<div class="profile-field">
+								<span class="profile-label">Email</span>
+								<span id="profile-email" class="profile-value">—</span>
+							</div>
+
+							<div class="profile-field">
+								<span class="profile-label">Timezone</span>
+								<select id="profile-timezone" class="profile-select"></select>
+							</div>
+						</div>
+
+						<button type="button" id="logout-btn" class="glow-btn glow-btn--danger">Sign Out</button>
+					</div>
+				</div>
+
+				<span id="version" class="version"></span>
 		</div>
 
 		<script type="module" src="/src/main.ts"></script>

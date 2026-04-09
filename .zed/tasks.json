@@ -1,8 +1,85 @@
 [
 	{
+		"label": "Dev: Client (Vite)",
+		"command": "pnpm dev",
+		"use_new_terminal": true,
+		"allow_concurrent_runs": false,
+		"reveal": "always"
+	},
+	{
+		"label": "Dev: Server (AdonisJS)",
+		"command": "pnpm dev:server",
+		"use_new_terminal": true,
+		"allow_concurrent_runs": false,
+		"reveal": "always"
+	},
+	{
+		"label": "Build: Client",
+		"command": "pnpm build",
+		"use_new_terminal": false,
+		"allow_concurrent_runs": false,
+		"reveal": "always"
+	},
+	{
+		"label": "Build: iOS (Capacitor)",
+		"command": "pnpm build:ios",
+		"use_new_terminal": false,
+		"allow_concurrent_runs": false,
+		"reveal": "always"
+	},
+	{
+		"label": "Build: Server",
+		"command": "pnpm server:build",
+		"use_new_terminal": false,
+		"allow_concurrent_runs": false,
+		"reveal": "always"
+	},
+	{
 		"label": "Deploy iOS",
 		"command": "./scripts/deploy-ios.sh",
 		"use_new_terminal": true,
+		"allow_concurrent_runs": false,
+		"reveal": "always"
+	},
+	{
+		"label": "Migrate: Run",
+		"command": "pnpm migrate",
+		"use_new_terminal": false,
+		"allow_concurrent_runs": false,
+		"reveal": "always"
+	},
+	{
+		"label": "Migrate: Rollback",
+		"command": "pnpm migrate:rollback",
+		"use_new_terminal": false,
+		"allow_concurrent_runs": false,
+		"reveal": "always"
+	},
+	{
+		"label": "Migrate: Fresh",
+		"command": "pnpm migrate:fresh",
+		"use_new_terminal": false,
+		"allow_concurrent_runs": false,
+		"reveal": "always"
+	},
+	{
+		"label": "Lint",
+		"command": "pnpm lint",
+		"use_new_terminal": false,
+		"allow_concurrent_runs": false,
+		"reveal": "always"
+	},
+	{
+		"label": "Typecheck: Client",
+		"command": "pnpm typecheck",
+		"use_new_terminal": false,
+		"allow_concurrent_runs": false,
+		"reveal": "always"
+	},
+	{
+		"label": "Typecheck: Server",
+		"command": "pnpm typecheck:server",
+		"use_new_terminal": false,
 		"allow_concurrent_runs": false,
 		"reveal": "always"
 	}
