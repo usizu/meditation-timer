@@ -12,7 +12,8 @@
       "Bash(xcodebuild -workspace ios/App/App.xcworkspace -scheme App -destination 'generic/platform=iOS' -allowProvisioningUpdates build)",
       "Bash(xcodebuild -project ios/App/App.xcodeproj -scheme App -destination 'generic/platform=iOS' -allowProvisioningUpdates build)",
       "Bash(xcodebuild -project ios/App/App.xcodeproj -scheme App -destination 'id=00008101-000255C60E81001E' -allowProvisioningUpdates build)",
-      "Bash(xcodebuild -project ios/App/App.xcodeproj -scheme App -destination 'id=DF9A8EE5-5CBC-53A8-B380-1E165990689A' -allowProvisioningUpdates build)"
+      "Bash(xcodebuild -project ios/App/App.xcodeproj -scheme App -destination 'id=DF9A8EE5-5CBC-53A8-B380-1E165990689A' -allowProvisioningUpdates build)",
+      "Bash(git:*)"
     ]
   }
 }
