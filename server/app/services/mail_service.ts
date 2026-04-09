@@ -26,7 +26,7 @@ export default class MailService {
 		const { error } = await resend.emails.send({
 			from: env.get('MAIL_FROM', 'Kitty Timer <noreply@resend.dev>'),
 			to: email,
-			subject: 'Your login code for Kitty Timer',
+			subject: `Your Kitty Timer code: ${code}`,
 			html: `
 				<div style="font-family: system-ui, sans-serif; max-width: 400px; margin: 0 auto; padding: 2rem;">
 					<h2 style="margin-bottom: 1.5rem;">Sign in to Kitty Timer</h2>
