@@ -33,6 +33,9 @@ export default defineConfig(({ command }) => {
 		plugins.push(
 			VitePWA({
 				registerType: "autoUpdate",
+				strategies: "injectManifest",
+				srcDir: "src",
+				filename: "sw.ts",
 				manifest: {
 					name: isDev ? "Kitty [Dev]" : "Kitty Timer",
 					short_name: isDev ? "Kitty [Dev]" : "Kitty Timer",
@@ -60,7 +63,7 @@ export default defineConfig(({ command }) => {
 						},
 					],
 				},
-				workbox: {
+				injectManifest: {
 					globPatterns: ["**/*.{js,css,html,png,svg,woff2}"],
 				},
 			}),

@@ -1,0 +1,42 @@
+@layout.main({ title: 'Verify — Kitty Timer' })
+	@slot('main')
+		<h1>Check your email</h1>
+
+		@if(flashMessages.has('error'))
+			<div class="error">{{ flashMessages.get('error') }}</div>
+		@end
+
+		@if(email)
+			<p class="hint" style="margin-bottom: 1.5rem;">
+				We sent a code to <strong style="color: #e4e4e7;">{{ email }}</strong>
+			</p>
+		@end
+
+		<form method="POST" action="{{ route('auth.verify') }}">
+			{{ csrfField() }}
+
+			<div class="form-group">
+				<label for="code">6-digit code</label>
+				<input
+					type="text"
+					id="code"
+					name="code"
+					class="code-input"
+					placeholder="000000"
+					maxlength="6"
+					inputmode="numeric"
+					pattern="[0-9]{6}"
+					autocomplete="one-time-code"
+					required
+					autofocus
+				>
+			</div>
+
+			<button type="submit">Verify</button>
+		</form>
+
+		<p class="hint">
+			Didn't get it? <a href="{{ route('auth.login') }}">Try again</a>
+		</p>
+	@end
+@end

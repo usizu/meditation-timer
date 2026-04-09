@@ -1,0 +1,145 @@
+@layout.main({ title: 'Friends — Kitty Timer' })
+	@slot('main')
+		<div class="friends-page" data-on-load="$$get('/sse/updates')">
+			<div class="friends-header">
+				<h1>Friends</h1>
+				<a href="{{ route('home') }}" class="back-link">&larr; Back</a>
+			</div>
+
+			@if(flashMessages.has('error'))
+				<div class="error">{{ flashMessages.get('error') }}</div>
+			@end
+			@if(flashMessages.has('success'))
+				<div class="success">{{ flashMessages.get('success') }}</div>
+			@end
+			@if(flashMessages.has('info'))
+				<div class="info">{{ flashMessages.get('info') }}</div>
+			@end
+
+			{{-- Add friend form --}}
+			<form method="POST" action="{{ route('friends.store') }}" class="add-friend-form">
+				{{ csrfField() }}
+				<input
+					type="email"
+					name="email"
+					placeholder="friend@example.com"
+					required
+				>
+				<button type="submit">Add</button>
+			</form>
+
+			{{-- Confirmed friends --}}
+			@if(friends.length > 0)
+				<div class="section">
+					<h2 class="section-title">Your friends</h2>
+					@each(friend in friends)
+						<div class="friend-card">
+							<div class="friend-info">
+								<div class="friend-name-row">
+									<span class="friend-email">{{ friend.email }}</span>
+									<span
+										id="friend-status-{{ friend.userId }}"
+										class="{{ friend.isMeditating ? 'meditating-indicator' : '' }}"
+									>{{ friend.isMeditating ? 'meditating' : '' }}</span>
+								</div>
+								<span class="friend-time" data-timezone="{{ friend.timezone }}">
+									{{ friend.timezone }}
+								</span>
+							</div>
+
+							<div class="friend-toggles">
+								<form method="POST" action="{{ route('friends.toggles', { id: friend.id }) }}">
+									{{ csrfField() }}
+									<input type="hidden" name="_method" value="PATCH">
+									<input type="hidden" name="toggle" value="notifyThem">
+									<input type="hidden" name="value" value="{{ friend.notifyThem ? 'false' : 'true' }}">
+									<button type="submit" class="toggle-btn {{ friend.notifyThem ? 'active' : '' }}" title="Notify them when you meditate">
+										<span class="toggle-icon">&#x1F514;</span>
+										<span class="toggle-label">Notify them</span>
+									</button>
+								</form>
+
+								<form method="POST" action="{{ route('friends.toggles', { id: friend.id }) }}">
+									{{ csrfField() }}
+									<input type="hidden" name="_method" value="PATCH">
+									<input type="hidden" name="toggle" value="notifyMe">
+									<input type="hidden" name="value" value="{{ friend.notifyMe ? 'false' : 'true' }}">
+									<button type="submit" class="toggle-btn {{ friend.notifyMe ? 'active' : '' }}" title="Get notified when they meditate">
+										<span class="toggle-icon">&#x1F4E8;</span>
+										<span class="toggle-label">Notify me</span>
+									</button>
+								</form>
+							</div>
+
+							<form method="POST" action="{{ route('friends.destroy', { id: friend.id }) }}" class="friend-remove">
+								{{ csrfField() }}
+								<input type="hidden" name="_method" value="DELETE">
+								<button type="submit" class="remove-btn" title="Remove friend">&times;</button>
+							</form>
+						</div>
+					@end
+				</div>
+			@end
+
+			{{-- Pending received (they added me) --}}
+			@if(pendingReceived.length > 0)
+				<div class="section">
+					<h2 class="section-title">Wants to be your friend</h2>
+					@each(pending in pendingReceived)
+						<div class="friend-card pending">
+							<div class="friend-info">
+								<span class="friend-email">{{ pending.email }}</span>
+								<span class="friend-status">Add them back to confirm</span>
+							</div>
+						</div>
+					@end
+				</div>
+			@end
+
+			{{-- Pending sent (I added them) --}}
+			@if(pendingSent.length > 0)
+				<div class="section">
+					<h2 class="section-title">Pending</h2>
+					@each(pending in pendingSent)
+						<div class="friend-card pending">
+							<div class="friend-info">
+								<span class="friend-email">{{ pending.email }}</span>
+								<span class="friend-status">Waiting for them to add you</span>
+							</div>
+							<form method="POST" action="{{ route('friends.destroy', { id: pending.id }) }}" class="friend-remove">
+								{{ csrfField() }}
+								<input type="hidden" name="_method" value="DELETE">
+								<button type="submit" class="remove-btn" title="Cancel request">&times;</button>
+							</form>
+						</div>
+					@end
+				</div>
+			@end
+
+			@if(friends.length === 0 && pendingSent.length === 0 && pendingReceived.length === 0)
+				<p class="empty-state">No friends yet. Add someone by email above.</p>
+			@end
+		</div>
+
+		<script>
+			/* Live local time for each friend's timezone */
+			function updateClocks() {
+				document.querySelectorAll('[data-timezone]').forEach((el) => {
+					const tz = el.getAttribute('data-timezone');
+					try {
+						const time = new Date().toLocaleTimeString('en-US', {
+							timeZone: tz,
+							hour: 'numeric',
+							minute: '2-digit',
+						});
+						el.textContent = tz + ' \u00B7 ' + time;
+					} catch {
+						/* invalid timezone, leave as-is */
+					}
+				});
+			}
+			updateClocks();
+			setInterval(updateClocks, 30000);
+		</script>
+	@end
+@end

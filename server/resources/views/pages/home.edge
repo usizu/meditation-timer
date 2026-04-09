@@ -1,0 +1,43 @@
+@layout.main({ title: 'Kitty Timer' })
+	@slot('main')
+		<h1>Welcome</h1>
+
+		<p style="text-align: center; color: #a1a1aa; margin-bottom: 2rem;">
+			Signed in as <strong style="color: #e4e4e7;">{{ user.email }}</strong>
+		</p>
+
+		<p style="text-align: center; color: #71717a; font-size: 0.875rem; margin-bottom: 2rem;">
+			Timezone: {{ user.timezone }}
+		</p>
+
+		<div style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
+			<a href="{{ route('friends.index') }}" class="download-btn" style="flex: 1; justify-content: center;">
+				Friends
+			</a>
+			<a href="{{ route('profile.show') }}" class="download-btn" style="flex: 1; justify-content: center;">
+				Profile
+			</a>
+		</div>
+
+		<div class="download-links">
+			<p class="download-heading">Get the app</p>
+			<a href="#" class="download-btn">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+				iOS (App Store)
+			</a>
+			<a href="#" class="download-btn">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+				Android (Google Play)
+			</a>
+			<a href="#" class="download-btn">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+				Install PWA
+			</a>
+		</div>
+
+		<form method="POST" action="{{ route('auth.logout') }}" style="margin-top: 2rem;">
+			{{ csrfField() }}
+			<button type="submit" style="background: #27272a;">Sign out</button>
+		</form>
+	@end
+@end

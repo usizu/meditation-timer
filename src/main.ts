@@ -16,6 +16,8 @@ import {
 	setupWakeLockReacquire,
 } from "./wakelock";
 import "./styles/main.scss";
+import * as api from "./api";
+import { setupPushNotifications } from "./push";
 
 /* ── Elements ── */
 const $ = (sel: string) => document.querySelector(sel) as HTMLElement;
@@ -134,6 +136,9 @@ function startSession(): void {
 	updateDisplay(selectedMinutes * 60 * 1000);
 	updateRing(0);
 
+	/* Notify server (non-blocking, respects silent mode) */
+	api.meditationStart();
+
 	audio.create(selectedMinutes, {
 		onTick(curSec, durSec) {
 			timer.handleTick(curSec, durSec);
@@ -165,6 +170,9 @@ function onSessionComplete(completed: boolean): void {
 	releaseWakeLock();
 	stopDailyCounter();
 	updateDailyDisplay();
+
+	/* Notify server (non-blocking) */
+	api.meditationEnd();
 
 	const elapsedMs = durationMs - remainingMs;
 	const elapsedMin = Math.round(elapsedMs / 60000);
@@ -341,7 +349,7 @@ sessionView.addEventListener("touchstart", (e) => {
 	/* cancel any running inertia */
 	cancelAnimationFrame(inertiaRafId);
 
-	const t = e.touches[0];
+		const t = e.touches[0];
 	dragStartX = t.clientX;
 	dragStartY = t.clientY;
 	lastTouchX = t.clientX;
@@ -479,3 +487,6 @@ if (import.meta.env.DEV) {
 
 /* ── Wake lock reacquire ── */
 setupWakeLockReacquire(() => timer.getState() === "running");
+
+/* ── Push notifications ── */
+setupPushNotifications();

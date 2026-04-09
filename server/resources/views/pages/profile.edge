@@ -1,0 +1,89 @@
+@layout.main({ title: 'Profile — Kitty Timer' })
+	@slot('main')
+		<div class="friends-page">
+			<div class="friends-header">
+				<h1>Profile</h1>
+				<a href="{{ route('home') }}" class="back-link">&larr; Back</a>
+			</div>
+
+			@if(flashMessages.has('success'))
+				<div class="success">{{ flashMessages.get('success') }}</div>
+			@end
+
+			<p style="color: #a1a1aa; margin-bottom: 1.5rem; font-size: 0.875rem;">
+				{{ user.email }}
+			</p>
+
+			<form method="POST" action="{{ route('profile.update') }}">
+				{{ csrfField() }}
+
+				<div class="form-group">
+					<label for="tz-search">Timezone</label>
+					<input
+						type="text"
+						id="tz-search"
+						placeholder="Search timezones..."
+						autocomplete="off"
+					>
+					<select id="tz-select" name="timezone" style="display:none;"></select>
+					<div id="tz-list" class="tz-list"></div>
+					<input type="hidden" name="timezone" id="tz-value" value="{{ user.timezone }}">
+					<p style="color: #71717a; font-size: 0.75rem; margin-top: 0.25rem;">
+						Current: <strong style="color: #a1a1aa;">{{ user.timezone }}</strong>
+					</p>
+				</div>
+
+				<button type="submit">Save</button>
+			</form>
+		</div>
+
+		<script>
+			const allTimezones = Intl.supportedValuesOf('timeZone');
+			const searchInput = document.getElementById('tz-search');
+			const tzList = document.getElementById('tz-list');
+			const tzValue = document.getElementById('tz-value');
+
+			function renderList(filter) {
+				const filtered = filter
+					? allTimezones.filter(tz => tz.toLowerCase().includes(filter.toLowerCase()))
+					: allTimezones;
+				const limited = filtered.slice(0, 8);
+				tzList.innerHTML = limited.map(tz =>
+					`<div class="tz-item" data-tz="${tz}">${tz}</div>`
+				).join('');
+			}
+
+			searchInput.addEventListener('input', () => {
+				renderList(searchInput.value);
+				tzList.style.display = searchInput.value ? 'block' : 'none';
+			});
+
+			searchInput.addEventListener('focus', () => {
+				if (searchInput.value) renderList(searchInput.value);
+			});
+
+			tzList.addEventListener('click', (e) => {
+				const item = e.target.closest('[data-tz]');
+				if (item) {
+					const tz = item.dataset.tz;
+					tzValue.value = tz;
+					searchInput.value = tz;
+					tzList.style.display = 'none';
+				}
+			});
+
+			document.addEventListener('click', (e) => {
+				if (!e.target.closest('#tz-search') && !e.target.closest('#tz-list')) {
+					tzList.style.display = 'none';
+				}
+			});
+
+			/* Auto-detect timezone on first visit */
+			const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+			if (tzValue.value === 'UTC' && detectedTz) {
+				tzValue.value = detectedTz;
+				searchInput.value = detectedTz;
+			}
+		</script>
+	@end
+@end
