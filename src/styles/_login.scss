@@ -61,3 +61,34 @@
 	text-align: center;
 	margin-top: 0.5rem;
 }
+
+.login-code-actions {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	margin-top: 0.25rem;
+}
+
+.login-link-btn {
+	background: none;
+	border: none;
+	color: $text-dim;
+	font-size: 0.8rem;
+	cursor: pointer;
+	padding: 0.25rem 0;
+	transition: color 0.2s;
+
+	&:hover {
+		color: $primary;
+	}
+
+	&:active {
+		color: $accent;
+	}
+}
+
+.login-link-sep {
+	color: rgba($text, 0.15);
+	font-size: 0.8rem;
+}

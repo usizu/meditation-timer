@@ -150,6 +150,11 @@
 						<p class="login-check-email">Check your email for a 6-digit code.</p>
 						<input type="text" id="login-code" placeholder="123456" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
 						<button type="submit" class="glow-btn">Verify</button>
+						<div class="login-code-actions">
+							<button type="button" id="login-resend-btn" class="login-link-btn">Resend code</button>
+							<span class="login-link-sep">·</span>
+							<button type="button" id="login-change-email-btn" class="login-link-btn">Different email</button>
+						</div>
 					</form>
 
 					<p id="login-error" class="login-error hidden"></p>
