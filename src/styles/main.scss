@@ -5,6 +5,16 @@
 @use "friends";
 @use "profile";
 
+// <weight>: Use a value from 200 to 900
+// <uniquifier>: Use a unique and descriptive class name
+
+.noto-serif-jp-mugen {
+	font-family: "Noto Serif JP", serif;
+	font-optical-sizing: auto;
+	font-weight: 400;
+	font-style: normal;
+}
+
 *,
 *::before,
 *::after {
@@ -88,14 +98,30 @@ body {
 }
 
 .title {
-	font-size: 2.2rem;
-	font-weight: 300;
+	font-size: 4.2rem;
+	font-weight: 700;
+	font-family: "Noto Serif JP";
 	letter-spacing: 0.15em;
 	text-transform: uppercase;
-	background: linear-gradient(135deg, $primary, $pink);
+	/* background: linear-gradient(135deg, $primary, $pink);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
-	background-clip: text;
+	background-clip: text; */
+	color: white;
+}
+
+.sub-title {
+	font-family: "Noto Serif JP";
+	font-weight: 800;
+	opacity: 0.3;
+	color: $beautiful;
+}
+
+.title-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-content: center;
 }
 
 .duration-presets {
@@ -213,7 +239,7 @@ body {
 	color: $bg;
 	font-weight: 500;
 	padding: 0.85rem 3rem;
-	border-radius: 3rem;
+	border-radius: 12px;
 	font-size: 1.1rem;
 	letter-spacing: 0.1em;
 	cursor: pointer;
@@ -537,4 +563,9 @@ body {
 		padding-top: env(safe-area-inset-top);
 		padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem);
 	}
+}
+
+.preset-group {
+	display: flex;
+	gap: 0.4rem;
 }

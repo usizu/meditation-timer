@@ -1,220 +1,220 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-		<meta name="theme-color" content="#1a0e2e" />
-		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-		<title>Kitty Timer</title>
-		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-		<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-	</head>
-	<body>
-		<div id="app">
-			<canvas id="starfield"></canvas>
 
-			<div id="home-view" class="view active">
-				<div class="home-content">
-					<h1 class="title">Kitty Timer</h1>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+	<meta name="theme-color" content="#1a0e2e" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+	<title>夢</title>
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+	<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-					<div class="nav-icons">
-						<button type="button" id="friends-nav-btn" class="nav-btn" aria-label="Friends">
-							<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-								<circle cx="9" cy="7" r="4"/>
-								<path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-								<path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-							</svg>
-						</button>
-						<button type="button" id="profile-nav-btn" class="nav-btn" aria-label="Profile">
-							<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-								<circle cx="12" cy="8" r="4"/>
-								<path d="M20 21a8 8 0 1 0-16 0"/>
-							</svg>
-						</button>
-					</div>
+	<!--Japanese Font-->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Flow+Circular&family=Noto+Serif+JP:wght@200..900&display=swap"
+		rel="stylesheet">
+</head>
 
-					<div class="home-controls">
+<body>
+	<div id="app">
+		<canvas id="starfield"></canvas>
+
+		<div id="home-view" class="view active">
+			<div class="home-content">
+
+				<div class="title-container">
+					<h1 class="title">夢</h1>
+					<div class="sub-title">mugen</div>
+				</div>
+
+				<div class="home-controls">
 					<div class="duration-presets">
-						<button type="button" class="preset active" data-minutes="5">5m</button>
-						<button type="button" class="preset" data-minutes="10">10m</button>
-						<button type="button" class="preset" data-minutes="15">15m</button>
-						<button type="button" class="preset" data-minutes="20">20m</button>
-						<button type="button" class="preset" data-minutes="30">30m</button>
-						<button type="button" class="preset" data-minutes="45">45m</button>
-						<button type="button" class="preset" data-minutes="60">60m</button>
+						<div class="content-group preset-group">
+							<button type="button" data-minutes="5" class="preset active">5</button>
+							<button type="button" data-minutes="10" class="preset">10</button>
+							<button type="button" data-minutes="15" class="preset">15</button>
+						</div>
+						<div class="content-group preset-group">
+							<button type="button" data-minutes="20" class="preset">20</button>
+							<button type="button" data-minutes="30" class="preset">30</button>
+							<button type="button" data-minutes="45" class="preset">45</button>
+							<button type="button" data-minutes="60" class="preset">60</button>
+						</div>
 					</div>
 
 					<div class="custom-duration">
 						<label for="custom-minutes">Custom</label>
 						<div class="stepper">
 							<button type="button" class="stepper-btn stepper-btn--dec" aria-label="Decrease minutes">&minus;</button>
-							<input
-								type="number"
-								id="custom-minutes"
-								min="1"
-								max="180"
-								placeholder="min"
-								inputmode="numeric"
-							/>
+							<input type="number" id="custom-minutes" min="1" max="180" placeholder="min" inputmode="numeric" />
 							<button type="button" class="stepper-btn stepper-btn--inc" aria-label="Increase minutes">&plus;</button>
 						</div>
 					</div>
 
 					<button type="button" id="start-btn" class="glow-btn">Begin</button>
-					</div>
-
-					<div class="daily-widget">
-						<span id="daily-minutes" class="daily-value">0</span>
-						<span class="daily-label">min today</span>
-					</div>
 				</div>
-			</div>
 
-			<div id="session-view" class="view">
-				<div class="session-content">
-					<div class="timer-ring-container">
-						<svg class="timer-ring" viewBox="0 0 200 200" role="img" aria-label="Meditation timer progress">
-							<defs>
-								<linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-									<stop offset="0%" stop-color="#cb96fe" />
-									<stop offset="50%" stop-color="#9dd4c0" />
-									<stop offset="100%" stop-color="#f0b0b0" />
-								</linearGradient>
-								<filter id="glow">
-									<feGaussianBlur stdDeviation="3" result="blur" />
-									<feMerge>
-										<feMergeNode in="blur" />
-										<feMergeNode in="SourceGraphic" />
-									</feMerge>
-								</filter>
-							</defs>
-							<circle
-								class="ring-bg"
-								cx="100"
-								cy="100"
-								r="90"
-								fill="none"
-								stroke="rgba(203, 150, 254, 0.15)"
-								stroke-width="4"
-							/>
-							<circle
-								id="ring-progress"
-								class="ring-progress"
-								cx="100"
-								cy="100"
-								r="90"
-								fill="none"
-								stroke="url(#ring-gradient)"
-								stroke-width="4"
-								stroke-linecap="round"
-								filter="url(#glow)"
-								transform="rotate(-90 100 100)"
-							/>
+				<div class="daily-widget">
+					<span id="daily-minutes" class="daily-value">0</span>
+					<span class="daily-label">min today</span>
+				</div>
+
+				<div class="nav-icons">
+					<button type="button" id="friends-nav-btn" class="nav-btn" aria-label="Friends">
+						<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+							stroke-linecap="round" stroke-linejoin="round">
+							<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+							<circle cx="9" cy="7" r="4" />
+							<path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+							<path d="M16 3.13a4 4 0 0 1 0 7.75" />
 						</svg>
-						<div class="timer-display">
-							<span id="timer-text">05:00</span>
-						</div>
-						<div class="breath-ring"></div>
-					</div>
-
-					<div class="session-controls">
-						<button type="button" id="pause-btn" class="control-btn">Pause</button>
-						<button type="button" id="stop-btn" class="control-btn control-btn--stop">End</button>
-					</div>
+						<span class="label">Friends</span>
+					</button>
+					<button type="button" id="profile-nav-btn" class="nav-btn" aria-label="Profile">
+						<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+							stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="8" r="4" />
+							<path d="M20 21a8 8 0 1 0-16 0" />
+						</svg>
+						<span class="label">Profile</span>
+					</button>
 				</div>
+
 			</div>
-
-			<div id="done-view" class="view">
-				<div class="done-content">
-					<div class="done-icon">&#10024;</div>
-					<h2 class="done-title">Session Complete</h2>
-					<p id="done-summary" class="done-summary"></p>
-					<button type="button" id="home-btn" class="glow-btn">Return</button>
-				</div>
-			</div>
-			<div id="login-view" class="view">
-				<div class="login-content">
-					<button type="button" class="back-btn" data-back="home">&#8592; Back</button>
-					<h2 class="login-title">Sign In</h2>
-					<p class="login-subtitle">Enter your email to receive a login code.</p>
-
-					<form id="login-email-form" class="login-form">
-						<input type="email" id="login-email" placeholder="you@email.com" required autocomplete="email" />
-						<button type="submit" class="glow-btn">Send Code</button>
-					</form>
-
-					<form id="login-code-form" class="login-form hidden">
-						<p class="login-check-email">Check your email for a 6-digit code.</p>
-						<input type="text" id="login-code" placeholder="123456" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
-						<button type="submit" class="glow-btn">Verify</button>
-						<div class="login-code-actions">
-							<button type="button" id="login-resend-btn" class="login-link-btn">Resend code</button>
-							<span class="login-link-sep">·</span>
-							<button type="button" id="login-change-email-btn" class="login-link-btn">Different email</button>
-						</div>
-					</form>
-
-					<p id="login-error" class="login-error hidden"></p>
-				</div>
-			</div>
-
-				<div id="friends-view" class="view">
-					<div class="friends-content">
-						<button type="button" class="back-btn" data-back="home">&#8592; Back</button>
-						<h2 class="friends-title">Friends</h2>
-
-						<form id="add-friend-form" class="add-friend-form">
-							<input type="email" id="add-friend-email" placeholder="friend@email.com" required autocomplete="email" />
-							<button type="submit" class="glow-btn glow-btn--sm">Add</button>
-						</form>
-						<p id="friend-msg" class="friend-msg hidden"></p>
-
-						<div id="pending-received" class="friend-section hidden">
-							<h3>Requests Received</h3>
-							<div id="pending-received-list" class="friend-list"></div>
-						</div>
-
-						<div id="pending-sent" class="friend-section hidden">
-							<h3>Requests Sent</h3>
-							<div id="pending-sent-list" class="friend-list"></div>
-						</div>
-
-						<div id="friends-list-section" class="friend-section">
-							<h3>Your Friends</h3>
-							<div id="friends-list" class="friend-list">
-								<p class="empty-state">No friends yet. Add someone above!</p>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div id="profile-view" class="view">
-					<div class="profile-content">
-						<button type="button" class="back-btn" data-back="home">&#8592; Back</button>
-						<h2 class="profile-title">Profile</h2>
-
-						<div class="profile-info">
-							<div class="profile-field">
-								<span class="profile-label">Email</span>
-								<span id="profile-email" class="profile-value">—</span>
-							</div>
-
-							<div class="profile-field">
-								<span class="profile-label">Timezone</span>
-								<select id="profile-timezone" class="profile-select"></select>
-							</div>
-						</div>
-
-						<button type="button" id="logout-btn" class="glow-btn glow-btn--danger">Sign Out</button>
-					</div>
-				</div>
-
-				<span id="version" class="version"></span>
 		</div>
 
-		<script type="module" src="/src/main.ts"></script>
-	</body>
+		<div id="session-view" class="view">
+			<div class="session-content">
+				<div class="timer-ring-container">
+					<svg class="timer-ring" viewBox="0 0 200 200" role="img" aria-label="Meditation timer progress">
+						<defs>
+							<linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+								<stop offset="0%" stop-color="#cb96fe" />
+								<stop offset="50%" stop-color="#9dd4c0" />
+								<stop offset="100%" stop-color="#f0b0b0" />
+							</linearGradient>
+							<filter id="glow">
+								<feGaussianBlur stdDeviation="3" result="blur" />
+								<feMerge>
+									<feMergeNode in="blur" />
+									<feMergeNode in="SourceGraphic" />
+								</feMerge>
+							</filter>
+						</defs>
+						<circle class="ring-bg" cx="100" cy="100" r="90" fill="none" stroke="rgba(203, 150, 254, 0.15)"
+							stroke-width="4" />
+						<circle id="ring-progress" class="ring-progress" cx="100" cy="100" r="90" fill="none"
+							stroke="url(#ring-gradient)" stroke-width="4" stroke-linecap="round" filter="url(#glow)"
+							transform="rotate(-90 100 100)" />
+					</svg>
+					<div class="timer-display">
+						<span id="timer-text">05:00</span>
+					</div>
+					<div class="breath-ring"></div>
+				</div>
+
+				<div class="session-controls">
+					<button type="button" id="pause-btn" class="control-btn">Pause</button>
+					<button type="button" id="stop-btn" class="control-btn control-btn--stop">End</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="done-view" class="view">
+			<div class="done-content">
+				<div class="done-icon">&#10024;</div>
+				<h2 class="done-title">Session Complete</h2>
+				<p id="done-summary" class="done-summary"></p>
+				<button type="button" id="home-btn" class="glow-btn">Return</button>
+			</div>
+		</div>
+		<div id="login-view" class="view">
+			<div class="login-content">
+				<button type="button" class="back-btn" data-back="home">&#8592; Back</button>
+				<h2 class="login-title">Sign In</h2>
+				<p class="login-subtitle">Enter your email to receive a login code.</p>
+
+				<form id="login-email-form" class="login-form">
+					<input type="email" id="login-email" placeholder="you@email.com" required autocomplete="email" />
+					<button type="submit" class="glow-btn">Send Code</button>
+				</form>
+
+				<form id="login-code-form" class="login-form hidden">
+					<p class="login-check-email">Check your email for a 6-digit code.</p>
+					<input type="text" id="login-code" placeholder="123456" inputmode="numeric" maxlength="6"
+						autocomplete="one-time-code" />
+					<button type="submit" class="glow-btn">Verify</button>
+					<div class="login-code-actions">
+						<button type="button" id="login-resend-btn" class="login-link-btn">Resend code</button>
+						<span class="login-link-sep">·</span>
+						<button type="button" id="login-change-email-btn" class="login-link-btn">Different email</button>
+					</div>
+				</form>
+
+				<p id="login-error" class="login-error hidden"></p>
+			</div>
+		</div>
+
+		<div id="friends-view" class="view">
+			<div class="friends-content">
+				<button type="button" class="back-btn" data-back="home">&#8592; Back</button>
+				<h2 class="friends-title">Friends</h2>
+
+				<form id="add-friend-form" class="add-friend-form">
+					<input type="email" id="add-friend-email" placeholder="friend@email.com" required autocomplete="email" />
+					<button type="submit" class="glow-btn glow-btn--sm">Add</button>
+				</form>
+				<p id="friend-msg" class="friend-msg hidden"></p>
+
+				<div id="pending-received" class="friend-section hidden">
+					<h3>Requests Received</h3>
+					<div id="pending-received-list" class="friend-list"></div>
+				</div>
+
+				<div id="pending-sent" class="friend-section hidden">
+					<h3>Requests Sent</h3>
+					<div id="pending-sent-list" class="friend-list"></div>
+				</div>
+
+				<div id="friends-list-section" class="friend-section">
+					<h3>Your Friends</h3>
+					<div id="friends-list" class="friend-list">
+						<p class="empty-state">No friends yet. Add someone above!</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="profile-view" class="view">
+			<div class="profile-content">
+				<button type="button" class="back-btn" data-back="home">&#8592; Back</button>
+				<h2 class="profile-title">Profile</h2>
+
+				<div class="profile-info">
+					<div class="profile-field">
+						<span class="profile-label">Email</span>
+						<span id="profile-email" class="profile-value">—</span>
+					</div>
+
+					<div class="profile-field">
+						<span class="profile-label">Timezone</span>
+						<select id="profile-timezone" class="profile-select"></select>
+					</div>
+				</div>
+
+				<button type="button" id="logout-btn" class="glow-btn glow-btn--danger">Sign Out</button>
+			</div>
+		</div>
+
+		<span id="version" class="version"></span>
+	</div>
+
+	<script type="module" src="/src/main.ts"></script>
+</body>
+
 </html>
