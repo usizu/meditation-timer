@@ -81,3 +81,11 @@ export function incrementDailyMinute(): number {
 	saveDaily(record);
 	return record.minutes;
 }
+
+export function addDailyMinutes(minutes: number): number {
+	const record = loadDaily();
+	record.day = getMeditationDay();
+	record.minutes += minutes;
+	saveDaily(record);
+	return record.minutes;
+}

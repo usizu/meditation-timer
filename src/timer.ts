@@ -45,6 +45,7 @@ export class Timer {
 	}
 
 	handleComplete(): void {
+		this.currentSec = this.durationSec;
 		this.setState("done");
 		this.callbacks.onComplete();
 	}
