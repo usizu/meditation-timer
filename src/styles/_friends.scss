@@ -1,4 +1,4 @@
-@use "variables" as *;
+@use "variables";
 
 .friends-content {
 	display: flex;
@@ -13,7 +13,7 @@
 .friends-title {
 	font-size: 1.4rem;
 	font-weight: 300;
-	color: $primary;
+	color: var(--primary);
 	margin-bottom: 1rem;
 }
 
@@ -24,26 +24,26 @@
 
 	input {
 		flex: 1;
-		background: rgba($primary, 0.08);
-		border: 1px solid $outline;
+		background: rgba(var(--primary-rgb), 0.08);
+		border: 1px solid var(--outline);
 		border-radius: 0.75rem;
 		padding: 0.6rem 0.75rem;
-		color: $text;
+		color: var(--text);
 		font-size: 0.9rem;
 		outline: none;
 
 		&:focus {
-			border-color: $primary;
+			border-color: var(--primary);
 		}
 
 		&::placeholder {
-			color: $text-dim;
+			color: var(--text-dim);
 		}
 	}
 }
 
 .friend-msg {
-	color: $accent;
+	color: var(--accent);
 	font-size: 0.85rem;
 	margin-bottom: 0.75rem;
 }
@@ -55,14 +55,14 @@
 		font-size: 0.8rem;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		color: $text-dim;
+		color: var(--text-dim);
 		margin-bottom: 0.5rem;
 	}
 }
 
 .friend-card {
-	background: rgba($primary, 0.06);
-	border: 1px solid rgba($primary, 0.15);
+	background: rgba(var(--primary-rgb), 0.06);
+	border: 1px solid rgba(var(--primary-rgb), 0.15);
 	border-radius: 0.75rem;
 	padding: 0.75rem;
 	margin-bottom: 0.5rem;
@@ -77,13 +77,13 @@
 }
 
 .friend-email {
-	color: $text;
+	color: var(--text);
 	font-size: 0.9rem;
 }
 
 .friend-meditating {
-	background: rgba($accent, 0.2);
-	color: $accent;
+	background: rgba(var(--accent-rgb), 0.2);
+	color: var(--accent);
 	font-size: 0.7rem;
 	padding: 0.15rem 0.5rem;
 	border-radius: 1rem;
@@ -92,7 +92,7 @@
 }
 
 .friend-tz {
-	color: $text-dim;
+	color: var(--text-dim);
 	font-size: 0.75rem;
 }
 
@@ -107,27 +107,27 @@
 	display: flex;
 	align-items: center;
 	gap: 0.3rem;
-	color: $text-dim;
+	color: var(--text-dim);
 	font-size: 0.75rem;
 	cursor: pointer;
 
 	input[type="checkbox"] {
-		accent-color: $primary;
+		accent-color: var(--primary);
 	}
 }
 
 .remove-friend-btn,
 .remove-pending-btn {
 	background: none;
-	border: 1px solid rgba($pink, 0.3);
-	color: $pink;
+	border: 1px solid rgba(var(--pink-rgb), 0.3);
+	color: var(--pink);
 	font-size: 0.7rem;
 	padding: 0.2rem 0.5rem;
 	border-radius: 0.5rem;
 	cursor: pointer;
 
 	&:active {
-		background: rgba($pink, 0.15);
+		background: rgba(var(--pink-rgb), 0.15);
 	}
 }
 
@@ -135,8 +135,8 @@
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
-	background: rgba($primary, 0.06);
-	border: 1px solid rgba($primary, 0.15);
+	background: rgba(var(--primary-rgb), 0.06);
+	border: 1px solid rgba(var(--primary-rgb), 0.15);
 	border-radius: 0.75rem;
 	padding: 0.6rem 0.75rem;
 	margin-bottom: 0.4rem;
@@ -144,7 +144,7 @@
 
 .pending-email {
 	flex: 1;
-	color: $text;
+	color: var(--text);
 	font-size: 0.85rem;
 }
 
@@ -154,7 +154,7 @@
 }
 
 .empty-state {
-	color: $text-dim;
+	color: var(--text-dim);
 	font-size: 0.85rem;
 	text-align: center;
 	padding: 1rem 0;

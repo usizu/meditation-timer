@@ -1,4 +1,4 @@
-@use "variables" as *;
+@use "variables";
 
 .login-content {
 	display: flex;
@@ -12,12 +12,12 @@
 .login-title {
 	font-size: 1.4rem;
 	font-weight: 300;
-	color: $primary;
+	color: var(--primary);
 	margin-bottom: 0.5rem;
 }
 
 .login-subtitle {
-	color: $text-dim;
+	color: var(--text-dim);
 	font-size: 0.9rem;
 	margin-bottom: 1.5rem;
 	text-align: center;
@@ -30,33 +30,33 @@
 	gap: 0.75rem;
 
 	input {
-		background: rgba($primary, 0.08);
-		border: 1px solid $outline;
+		background: rgba(var(--primary-rgb), 0.08);
+		border: 1px solid var(--outline);
 		border-radius: 0.75rem;
 		padding: 0.75rem 1rem;
-		color: $text;
+		color: var(--text);
 		font-size: 1rem;
 		outline: none;
 		transition: border-color 0.2s;
 
 		&:focus {
-			border-color: $primary;
+			border-color: var(--primary);
 		}
 
 		&::placeholder {
-			color: $text-dim;
+			color: var(--text-dim);
 		}
 	}
 }
 
 .login-check-email {
-	color: $accent;
+	color: var(--accent);
 	font-size: 0.85rem;
 	text-align: center;
 }
 
 .login-error {
-	color: $pink;
+	color: var(--pink);
 	font-size: 0.85rem;
 	text-align: center;
 	margin-top: 0.5rem;
@@ -73,22 +73,22 @@
 .login-link-btn {
 	background: none;
 	border: none;
-	color: $text-dim;
+	color: var(--text-dim);
 	font-size: 0.8rem;
 	cursor: pointer;
 	padding: 0.25rem 0;
 	transition: color 0.2s;
 
 	&:hover {
-		color: $primary;
+		color: var(--primary);
 	}
 
 	&:active {
-		color: $accent;
+		color: var(--accent);
 	}
 }
 
 .login-link-sep {
-	color: rgba($text, 0.15);
+	color: rgba(var(--text-rgb), 0.15);
 	font-size: 0.8rem;
 }

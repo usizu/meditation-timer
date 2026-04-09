@@ -1,4 +1,4 @@
-@use "variables" as *;
+@use "variables";
 
 .nav-icons {
 	display: flex;
@@ -8,8 +8,8 @@
 }
 
 .nav-btn {
-	background: rgba($primary, 0.12);
-	border: 1px solid rgba($primary, 0.25);
+	background: rgba(var(--primary-rgb), 0.12);
+	border: 1px solid rgba(var(--primary-rgb), 0.25);
 	border-radius: 8px;
 	width: fit-content;
 	height: 2.5rem;
@@ -17,14 +17,14 @@
 	gap: 8px;
 	align-items: center;
 	justify-content: center;
-	color: $primary;
+	color: var(--primary);
 	cursor: pointer;
 	transition: all 0.2s ease;
 	padding: 4px 22px;
 
 	&:active {
 		transform: scale(0.92);
-		background: rgba($primary, 0.25);
+		background: rgba(var(--primary-rgb), 0.25);
 	}
 
 	svg {

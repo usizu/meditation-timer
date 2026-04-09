@@ -1,10 +1,18 @@
-$bg: #080618;
-$primary: #cb96fe;
-$accent: #9dd4c0;
-$pink: #f0b0b0;
-$text: #f5eaf0;
-$text-dim: rgba(245, 234, 240, 0.5);
-$glow-purple: rgba(203, 150, 254, 0.4);
-$glow-accent: rgba(157, 212, 192, 0.3);
-$outline: #503060;
-$beautiful: hsl(246.4, 53.5%, 68.8%);
+:root {
+	--bg: #080618;
+	--primary: #cb96fe;
+	--primary-rgb: 203, 150, 254;
+	--primary-dark: #b263fe;
+	--accent: #9dd4c0;
+	--accent-rgb: 157, 212, 192;
+	--pink: #f0b0b0;
+	--pink-rgb: 240, 176, 176;
+	--pink-dark: #e67d7d;
+	--text: #f5eaf0;
+	--text-rgb: 245, 234, 240;
+	--text-dim: rgba(245, 234, 240, 0.5);
+	--glow-purple: rgba(203, 150, 254, 0.4);
+	--glow-accent: rgba(157, 212, 192, 0.3);
+	--outline: #503060;
+	--beautiful: hsl(246 31% 25% / 100%);
+}
