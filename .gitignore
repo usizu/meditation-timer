@@ -8,3 +8,4 @@ ios/App/Pods/
 
 # Deploy logs
 scripts/*.log
+scripts/deploy-history.jsonl

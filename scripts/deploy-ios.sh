@@ -15,15 +15,25 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOG_FILE="$PROJECT_DIR/scripts/deploy.log"
+DEPLOY_HISTORY="$PROJECT_DIR/scripts/deploy-history.jsonl"
 XCODE_PROJECT="$PROJECT_DIR/ios/App/App.xcodeproj"
 SCHEME="App"
 DEVICE_ID="${1:-}"
 
 log() { printf '[%s] %s\n' "$(date '+%H:%M:%S')" "$@" | tee -a "$LOG_FILE"; }
 
+# Capture git state before build
+GIT_COMMIT=$(git -C "$PROJECT_DIR" rev-parse HEAD 2>/dev/null || echo "unknown")
+GIT_COMMIT_SHORT=$(git -C "$PROJECT_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")
+GIT_BRANCH=$(git -C "$PROJECT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+GIT_DIRTY=$(git -C "$PROJECT_DIR" status --porcelain 2>/dev/null | head -1)
+GIT_COMMIT_MSG=$(git -C "$PROJECT_DIR" log -1 --pretty=%s 2>/dev/null || echo "unknown")
+APP_VERSION=$(node -p "require('$PROJECT_DIR/package.json').version" 2>/dev/null || echo "unknown")
+
 cd "$PROJECT_DIR"
 
 log "=== Kitty Timer iOS deploy ==="
+log "Version: $APP_VERSION | Commit: $GIT_COMMIT_SHORT ($GIT_BRANCH) | Dirty: ${GIT_DIRTY:+yes}"
 
 # ── Find device ──────────────────────────────────────────────────────
 if [[ -z "$DEVICE_ID" ]]; then
@@ -74,4 +84,16 @@ xcrun devicectl device install app \
 	--device "$DEVICE_ID" \
 	"$APP_PATH" 2>&1 | tee -a "$LOG_FILE"
 
-log "=== Deploy complete ==="
+# ── Record deploy to history ────────────────────────────────────────
+DEPLOY_ENTRY=$(printf '{"timestamp":"%s","version":"%s","commit":"%s","commit_short":"%s","branch":"%s","dirty":%s,"commit_msg":"%s","device":"%s"}' \
+	"$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+	"$APP_VERSION" \
+	"$GIT_COMMIT" \
+	"$GIT_COMMIT_SHORT" \
+	"$GIT_BRANCH" \
+	"$([ -n "$GIT_DIRTY" ] && echo 'true' || echo 'false')" \
+	"$(echo "$GIT_COMMIT_MSG" | sed 's/"/\\"/g')" \
+	"$DEVICE_ID")
+echo "$DEPLOY_ENTRY" >> "$DEPLOY_HISTORY"
+
+log "=== Deploy complete (recorded to deploy-history.jsonl) ==="
