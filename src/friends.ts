@@ -174,6 +174,7 @@ function renderFriends(friends: Friend[]): void {
 		});
 
 		card.querySelector(".remove-friend-btn")?.addEventListener("click", async () => {
+			if (!confirm("Remove this friend?")) return;
 			await apiRemoveFriend(id);
 			await loadFriends();
 		});
@@ -199,12 +200,14 @@ function renderPending(
 			(p) => `
 		<div class="pending-card" data-id="${p.id}">
 			<span class="pending-email">${esc(p.email)}</span>
+			<div class='pending-actions-container'>
 			${
 				isReceived
 					? `<button type="button" class="accept-btn glow-btn glow-btn--sm">Accept</button>`
 					: ""
 			}
 			<button type="button" class="remove-pending-btn">Cancel</button>
+			</div>
 		</div>`,
 		)
 		.join("");
