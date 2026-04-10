@@ -118,6 +118,14 @@ export function playChime(): void {
 	audioEl.play();
 }
 
+/* ── Shared AudioContext for UI sounds (bell, etc.) ── */
+
+let _audioCtx: AudioContext | null = null;
+function getAudioCtx(): AudioContext {
+	if (!_audioCtx) _audioCtx = new AudioContext();
+	return _audioCtx;
+}
+
 /**
  * A single singing-bowl strike via Web Audio API.
  * Uses AudioContext so it never appears in lock screen controls.
@@ -130,10 +138,10 @@ export function playBell(): void {
 	const now = ctx.currentTime;
 
 	const partials = [
-		{ freq: 440, gain: 0.4, decay: 3.0 },   /* fundamental A4 */
-		{ freq: 880, gain: 0.15, decay: 2.0 },   /* octave */
-		{ freq: 1318, gain: 0.08, decay: 1.5 },  /* ~E6 (inharmonic) */
-		{ freq: 1864, gain: 0.04, decay: 1.0 },  /* metallic shimmer */
+		{ freq: 440, gain: 0.4, decay: 3.0 } /* fundamental A4 */,
+		{ freq: 880, gain: 0.15, decay: 2.0 } /* octave */,
+		{ freq: 1318, gain: 0.08, decay: 1.5 } /* ~E6 (inharmonic) */,
+		{ freq: 1864, gain: 0.04, decay: 1.0 } /* metallic shimmer */,
 	];
 
 	for (const p of partials) {

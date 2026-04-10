@@ -21,6 +21,12 @@ interface PushPayload {
 	/** Alternate title/body for web push (iOS PWA already shows app name) */
 	webTitle?: string
 	webBody?: string
+	/**
+	 * Sound effect name for native push (e.g. "chime", "bell", "gong").
+	 * Maps to a bundled .caf/.wav file on iOS/Android.
+	 * Web push ignores this — the client plays the sound via Web Audio API.
+	 */
+	sound?: string
 }
 
 export default class PushService {

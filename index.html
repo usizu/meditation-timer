@@ -218,6 +218,30 @@
 					</div>
 				</div>
 
+				<div class="profile-section-divider"></div>
+				<h3 class="profile-section-title">Notification Sound</h3>
+				<div class="profile-info">
+					<label class="profile-toggle">
+						<input type="checkbox" id="notif-sound-enabled">
+						<span class="profile-toggle-label">Enable sound</span>
+					</label>
+
+					<div id="notif-sound-options" class="notif-sound-options hidden">
+						<div class="profile-field">
+							<span class="profile-label">Effect</span>
+							<div class="notif-effect-row">
+								<select id="notif-effect" class="profile-select notif-effect-select"></select>
+								<button type="button" id="notif-preview-btn" class="notif-preview-btn" aria-label="Preview sound">&#9654;</button>
+							</div>
+						</div>
+
+						<div class="profile-field">
+							<span class="profile-label">Volume</span>
+							<input type="range" id="notif-volume" class="notif-volume-slider" min="0" max="100" step="1">
+						</div>
+					</div>
+				</div>
+
 				<button type="button" id="logout-btn" class="glow-btn glow-btn--danger">Sign Out</button>
 			</div>
 		</div>

@@ -89,6 +89,17 @@ async function setupNativePush(type: "apns" | "fcm"): Promise<void> {
 	 * 3. Register and get token from 'registration' event
 	 * 4. Call registerPushSubscription(token, type)
 	 * 5. Listen for 'pushNotificationReceived' for foreground handling
+	 *
+	 * Custom notification sounds (iOS/Android):
+	 * - Bundle .caf (iOS) / .wav (Android) files in the native project
+	 *   for each effect: chime, bell, drop, gong, birdsong, harp
+	 * - The server includes a `sound` field in the push payload
+	 *   matching the user's selected effect name
+	 * - iOS: set `sound` in APNs payload (e.g. "chime.caf")
+	 * - Android: set `sound` in FCM notification (e.g. "chime")
+	 *   and register a notification channel per sound
+	 * - Use getNativeSound() from notification-sounds.ts to read
+	 *   the user's current preference when registering the subscription
 	 */
 	console.info(`[push] Native push (${type}) not yet implemented`);
 }

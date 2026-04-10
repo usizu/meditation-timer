@@ -80,3 +80,174 @@
 		color: var(--text);
 	}
 }
+
+/* ── Section divider ── */
+
+.profile-section-divider {
+	width: 100%;
+	height: 1px;
+	background: var(--outline);
+	margin: 0.5rem 0;
+}
+
+.profile-section-title {
+	font-size: 0.95rem;
+	font-weight: 400;
+	color: var(--primary);
+	margin-bottom: 0.75rem;
+	align-self: flex-start;
+}
+
+/* ── Toggle checkbox ── */
+
+.profile-toggle {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	cursor: pointer;
+
+	input[type="checkbox"] {
+		appearance: none;
+		width: 2.4rem;
+		height: 1.3rem;
+		border-radius: 0.65rem;
+		background: rgba(var(--primary-rgb), 0.15);
+		border: 1px solid var(--outline);
+		position: relative;
+		cursor: pointer;
+		transition: background 0.2s ease, border-color 0.2s ease;
+		flex-shrink: 0;
+
+		&::after {
+			content: "";
+			position: absolute;
+			top: 2px;
+			left: 2px;
+			width: 0.85rem;
+			height: 0.85rem;
+			border-radius: 50%;
+			background: var(--text-dim);
+			transition: transform 0.2s ease, background 0.2s ease;
+		}
+
+		&:checked {
+			background: rgba(var(--primary-rgb), 0.35);
+			border-color: var(--primary);
+
+			&::after {
+				transform: translateX(1.1rem);
+				background: var(--primary);
+			}
+		}
+	}
+}
+
+.profile-toggle-label {
+	font-size: 0.9rem;
+	color: var(--text);
+}
+
+/* ── Notification sound options ── */
+
+.notif-sound-options {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	width: 100%;
+	animation: notif-reveal 0.25s ease;
+}
+
+@keyframes notif-reveal {
+	from {
+		opacity: 0;
+		transform: translateY(-0.5rem);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.notif-effect-row {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.notif-effect-select {
+	flex: 1;
+}
+
+.notif-preview-btn {
+	background: rgba(var(--primary-rgb), 0.15);
+	border: 1px solid var(--outline);
+	border-radius: 0.75rem;
+	color: var(--primary);
+	width: 2.4rem;
+	height: 2.4rem;
+	font-size: 0.85rem;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+	flex-shrink: 0;
+
+	&:hover {
+		border-color: var(--primary);
+		background: rgba(var(--primary-rgb), 0.25);
+	}
+
+	&:active {
+		transform: scale(0.92);
+	}
+}
+
+/* ── Volume slider ── */
+
+.notif-volume-slider {
+	width: 100%;
+	height: 4px;
+	appearance: none;
+	background: rgba(var(--primary-rgb), 0.2);
+	border-radius: 2px;
+	outline: none;
+	cursor: pointer;
+
+	&::-webkit-slider-thumb {
+		appearance: none;
+		width: 1.1rem;
+		height: 1.1rem;
+		border-radius: 50%;
+		background: var(--primary);
+		border: 2px solid var(--bg);
+		box-shadow: 0 0 6px var(--glow-purple);
+		cursor: pointer;
+		transition: transform 0.15s ease;
+
+		&:active {
+			transform: scale(1.2);
+		}
+	}
+
+	&::-moz-range-thumb {
+		width: 1.1rem;
+		height: 1.1rem;
+		border-radius: 50%;
+		background: var(--primary);
+		border: 2px solid var(--bg);
+		box-shadow: 0 0 6px var(--glow-purple);
+		cursor: pointer;
+	}
+
+	&::-webkit-slider-runnable-track {
+		height: 4px;
+		border-radius: 2px;
+	}
+
+	&::-moz-range-track {
+		height: 4px;
+		border-radius: 2px;
+		background: rgba(var(--primary-rgb), 0.2);
+	}
+}

@@ -27,7 +27,16 @@ self.addEventListener("push", (event) => {
 		data: { url: payload.url || "/" },
 	};
 
-	event.waitUntil(self.registration.showNotification(title, options));
+	event.waitUntil(
+		self.registration.showNotification(title, options).then(() => {
+			/* Notify the main thread so it can play a notification sound */
+			return self.clients.matchAll({ type: "window" }).then((clients) => {
+				for (const client of clients) {
+					client.postMessage({ type: "push-received" });
+				}
+			});
+		}),
+	);
 });
 
 /* ── Notification click handler ── */

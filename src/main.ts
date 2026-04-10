@@ -22,6 +22,7 @@ import { checkAuth, getCachedUser } from "./auth";
 import { initFriends, leaveFriends, openFriends } from "./friends";
 import { initLogin } from "./login";
 import { initBackButtons, navigateTo, onLeaveView, showViewEl } from "./nav";
+import { playNotificationSound } from "./notification-sounds";
 import { initProfile, loadProfile } from "./profile";
 import { setupPushNotifications } from "./push";
 
@@ -467,6 +468,15 @@ setupWakeLockReacquire(() => timer.getState() === "running");
 
 /* ── Push notifications ── */
 setupPushNotifications();
+
+/* Play notification sound when a push arrives while the app is in the foreground */
+if ("serviceWorker" in navigator) {
+	navigator.serviceWorker.addEventListener("message", (event) => {
+		if (event.data?.type === "push-received") {
+			playNotificationSound();
+		}
+	});
+}
 
 /* ── Social features (friends, profile, login) ── */
 initBackButtons();

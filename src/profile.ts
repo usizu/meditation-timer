@@ -5,6 +5,12 @@
 import { apiProfile, apiUpdateProfile } from "./api";
 import { getCachedUser, logout } from "./auth";
 import { showView } from "./nav";
+import {
+	EFFECTS,
+	loadSettings,
+	previewEffect,
+	saveSettings,
+} from "./notification-sounds";
 
 const $ = (sel: string) => document.querySelector(sel) as HTMLElement;
 
@@ -51,6 +57,61 @@ export function initProfile(): void {
 	logoutBtn.addEventListener("click", async () => {
 		await logout();
 		showView("home-view");
+	});
+
+	/* ── Notification sound settings ── */
+	const soundEnabled = $("#notif-sound-enabled") as HTMLInputElement;
+	const soundOptions = $("#notif-sound-options");
+	const effectSelect = $("#notif-effect") as HTMLSelectElement;
+	const previewBtn = $("#notif-preview-btn");
+	const volumeSlider = $("#notif-volume") as HTMLInputElement;
+
+	/* Populate effect dropdown */
+	for (const fx of EFFECTS) {
+		const opt = document.createElement("option");
+		opt.value = fx.name;
+		opt.textContent = fx.label;
+		effectSelect.appendChild(opt);
+	}
+
+	/* Load saved settings */
+	const saved = loadSettings();
+	soundEnabled.checked = saved.enabled;
+	effectSelect.value = saved.effect;
+	volumeSlider.value = String(Math.round(saved.volume * 100));
+	if (saved.enabled) soundOptions.classList.remove("hidden");
+
+	/* Toggle sound on/off */
+	soundEnabled.addEventListener("change", () => {
+		const settings = loadSettings();
+		settings.enabled = soundEnabled.checked;
+		saveSettings(settings);
+
+		if (soundEnabled.checked) {
+			soundOptions.classList.remove("hidden");
+		} else {
+			soundOptions.classList.add("hidden");
+		}
+	});
+
+	/* Change effect */
+	effectSelect.addEventListener("change", () => {
+		const settings = loadSettings();
+		settings.effect = effectSelect.value;
+		saveSettings(settings);
+	});
+
+	/* Preview button */
+	previewBtn.addEventListener("click", () => {
+		const vol = Number(volumeSlider.value) / 100;
+		previewEffect(effectSelect.value, vol);
+	});
+
+	/* Volume slider */
+	volumeSlider.addEventListener("input", () => {
+		const settings = loadSettings();
+		settings.volume = Number(volumeSlider.value) / 100;
+		saveSettings(settings);
 	});
 }
 
