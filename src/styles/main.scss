@@ -261,6 +261,23 @@ div[class*="-content"] {
 	}
 }
 
+.private-toggle {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+	font-size: 0.8rem;
+	color: var(--text-dim);
+	user-select: none;
+
+	input[type="checkbox"] {
+		accent-color: var(--primary);
+		width: 1rem;
+		height: 1rem;
+		cursor: pointer;
+	}
+}
+
 .glow-btn {
 	background: linear-gradient(135deg, var(--primary), var(--primary-dark));
 	border: none;

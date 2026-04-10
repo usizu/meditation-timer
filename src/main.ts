@@ -40,6 +40,7 @@ const presetBtns = document.querySelectorAll<HTMLButtonElement>(".preset");
 const customInput = $("#custom-minutes") as HTMLInputElement;
 const practiceInput = $("#practice-input") as HTMLInputElement;
 const startBtn = $("#start-btn");
+const privateCheckbox = $("#private-meditation") as HTMLInputElement;
 
 const timerText = $("#timer-text");
 const ringProgress = document.querySelector("#ring-progress") as SVGCircleElement;
@@ -206,6 +207,11 @@ function stepCustom(delta: number): void {
 
 $(".stepper-btn--dec").addEventListener("click", () => stepCustom(-1));
 $(".stepper-btn--inc").addEventListener("click", () => stepCustom(1));
+
+privateCheckbox.checked = api.isSilentMode();
+privateCheckbox.addEventListener("change", () => {
+	api.setSilentMode(privateCheckbox.checked);
+});
 
 startBtn.addEventListener("click", () => {
 	haptics.tapMedium();
