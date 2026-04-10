@@ -69,23 +69,29 @@
 	gap: 0.5rem;
 	display: flex;
 	flex-wrap: wrap;
-
-	& > div {
-		flex-grow: 1;
-	}
 }
 
 .friend-info {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	gap: 0.5rem;
 	flex-wrap: wrap;
 	margin-bottom: 0.4rem;
+	flex-grow: 1;
+}
+
+.friend-info,
+.friend-meta {
+	flex-basis: 45%;
+	padding: 8px;
 }
 
 .friend-name {
 	color: var(--text);
 	font-size: 0.9rem;
+	display: flex;
+	align-items: center;
+	gap: 8px;
 }
 
 .friend-online {
@@ -95,6 +101,7 @@
 	background: var(--accent);
 	flex-shrink: 0;
 	box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.6);
+	display: inline-block;
 
 	&.hidden {
 		display: none;
@@ -128,14 +135,26 @@
 
 .friend-meta {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	gap: 0.5rem;
+	flex-basis: 5%;
+	flex-wrap: wrap;
+	background: #0003;
+	border-radius: 8px;
+	gap: 4px 8px;
+	justify-content: flex-end;
+	padding: 8px 16px;
+
+	& > span {
+		white-space: nowrap;
+	}
 }
 
 .friend-practice {
 	color: var(--text);
 	font-size: 0.75rem;
 	font-style: italic;
+	width: 100%;
 
 	&.hidden {
 		display: none;
@@ -162,6 +181,11 @@
 	justify-content: space-between;
 	gap: 0.75rem;
 	flex-wrap: wrap;
+	width: 100%;
+	border-top: 1px dashed rgba(var(--primary-rgb), 0.15);
+	gap: 8px 16px;
+	padding-top: 12px;
+	margin-top: 4px;
 }
 
 .toggle-label {

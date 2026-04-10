@@ -133,24 +133,24 @@ function renderFriends(friends: Friend[]): void {
 			return `
 		<div class="friend-card" data-id="${f.id}" data-user-id="${f.userId}" data-daycycle="${ti.daycycle}">
 			<div class="friend-info">
-				<span class="friend-online${f.isOnline ? "" : " hidden"}"></span>
-				<span class="friend-name">${displayName}</span>
+
+				<span class="friend-name"><span class="friend-online${f.isOnline ? "" : " hidden"}"></span> ${displayName}</span>
 				<span class="friend-meditating${f.isMeditating ? "" : " hidden"}">meditating</span>
-				<span class="friend-time">${esc(ti.localTime)}</span>
-				<span class="friend-offset">${esc(ti.offset)}</span>
+				<span class="friend-practice${f.practice ? "" : " hidden"}">${f.practice ? esc(f.practice) : ""}</span>
 			</div>
 			<div class="friend-meta">
-				<span class="friend-practice${f.practice ? "" : " hidden"}">${f.practice ? esc(f.practice) : ""}</span>
+				<span class="friend-time">${esc(ti.localTime)}</span>
+				<span class="friend-offset">${esc(ti.offset)}</span>
 				<span class="friend-tz">${esc(f.timezone)}</span>
 			</div>
 			<div class="friend-actions">
 				<label class="toggle-label">
 					<input type="checkbox" class="toggle-notify-them" ${f.notifyThem ? "checked" : ""} />
-					Notify them
+					Notify them when I meditate
 				</label>
 				<label class="toggle-label">
 					<input type="checkbox" class="toggle-notify-me" ${f.notifyMe ? "checked" : ""} />
-					Notify me
+					Notify me when they meditate
 				</label>
 				<button type="button" class="remove-friend-btn">Remove</button>
 			</div>
