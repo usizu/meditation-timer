@@ -24,6 +24,37 @@
 	<div id="app">
 		<canvas id="starfield"></canvas>
 
+		<div class="nav-icons">
+			<button type="button" id="friends-nav-btn" class="nav-btn" aria-label="Friends">
+				<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+					stroke-linecap="round" stroke-linejoin="round">
+					<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+					<circle cx="9" cy="7" r="4" />
+					<path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+					<path d="M16 3.13a4 4 0 0 1 0 7.75" />
+				</svg>
+				<span class="label">Friends</span>
+			</button>
+			<button type="button" id="timer-nav-btn" class="nav-btn" aria-label="Timer">
+				<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+					stroke-linecap="round" stroke-linejoin="round">
+					<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+					<circle cx="9" cy="7" r="4" />
+					<path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+					<path d="M16 3.13a4 4 0 0 1 0 7.75" />
+				</svg>
+				<span class="label">Timer</span>
+			</button>
+			<button type="button" id="profile-nav-btn" class="nav-btn" aria-label="Profile">
+				<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+					stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="12" cy="8" r="4" />
+					<path d="M20 21a8 8 0 1 0-16 0" />
+				</svg>
+				<span class="label">Profile</span>
+			</button>
+		</div>
+
 		<div id="home-view" class="view active">
 			<div class="home-content">
 
@@ -63,27 +94,6 @@
 				<div class="daily-widget">
 					<span id="daily-minutes" class="daily-value">0</span>
 					<span class="daily-label">min today</span>
-				</div>
-
-				<div class="nav-icons">
-					<button type="button" id="friends-nav-btn" class="nav-btn" aria-label="Friends">
-						<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-							stroke-linecap="round" stroke-linejoin="round">
-							<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-							<circle cx="9" cy="7" r="4" />
-							<path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-							<path d="M16 3.13a4 4 0 0 1 0 7.75" />
-						</svg>
-						<span class="label">Friends</span>
-					</button>
-					<button type="button" id="profile-nav-btn" class="nav-btn" aria-label="Profile">
-						<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-							stroke-linecap="round" stroke-linejoin="round">
-							<circle cx="12" cy="8" r="4" />
-							<path d="M20 21a8 8 0 1 0-16 0" />
-						</svg>
-						<span class="label">Profile</span>
-					</button>
 				</div>
 
 			</div>
@@ -136,7 +146,7 @@
 		</div>
 		<div id="login-view" class="view">
 			<div class="login-content">
-				<button type="button" class="back-btn" data-back="home">&#8592; Back</button>
+				<!--<button type="button" class="back-btn" data-back="home">&#8592; Back</button>-->
 				<h2 class="login-title">Sign In</h2>
 				<p class="login-subtitle">Enter your email to receive a login code.</p>
 
@@ -163,7 +173,7 @@
 
 		<div id="friends-view" class="view">
 			<div class="friends-content">
-				<button type="button" class="back-btn" data-back="home">&#8592; Back</button>
+				<!--<button type="button" class="back-btn" data-back="home">&#8592; Back</button>-->
 				<h2 class="friends-title">Friends</h2>
 
 				<form id="add-friend-form" class="add-friend-form">
@@ -193,7 +203,7 @@
 
 		<div id="profile-view" class="view">
 			<div class="profile-content">
-				<button type="button" class="back-btn" data-back="home">&#8592; Back</button>
+				<!--<button type="button" class="back-btn" data-back="home">&#8592; Back</button>-->
 				<h2 class="profile-title">Profile</h2>
 
 				<div class="profile-info">
@@ -209,7 +219,8 @@
 
 					<div class="profile-field">
 						<span class="profile-label">Practice</span>
-						<input type="text" id="profile-status" class="profile-input" placeholder="e.g. Vipassana, breathwork…" maxlength="128">
+						<input type="text" id="profile-status" class="profile-input" placeholder="e.g. Vipassana, breathwork…"
+							maxlength="128">
 					</div>
 
 					<div class="profile-field">
@@ -231,7 +242,8 @@
 							<span class="profile-label">Effect</span>
 							<div class="notif-effect-row">
 								<select id="notif-effect" class="profile-select notif-effect-select"></select>
-								<button type="button" id="notif-preview-btn" class="notif-preview-btn" aria-label="Preview sound">&#9654;</button>
+								<button type="button" id="notif-preview-btn" class="notif-preview-btn"
+									aria-label="Preview sound">&#9654;</button>
 							</div>
 						</div>
 

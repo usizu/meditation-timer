@@ -68,6 +68,10 @@ body {
 	pointer-events: none;
 	transition: opacity 0.25s ease;
 	padding-top: 5dvh;
+	max-height: calc(
+		100dvh - var(--toolbar-height) - env(safe-area-inset-bottom)
+	);
+	overflow: scroll;
 
 	&.active {
 		opacity: 1;

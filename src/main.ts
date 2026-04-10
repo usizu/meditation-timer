@@ -10,11 +10,7 @@ import {
 } from "./storage";
 import type { TimerState } from "./timer";
 import { Timer } from "./timer";
-import {
-	releaseWakeLock,
-	requestWakeLock,
-	setupWakeLockReacquire,
-} from "./wakelock";
+import { releaseWakeLock, requestWakeLock, setupWakeLockReacquire } from "./wakelock";
 import "./styles/main.scss";
 import { Capacitor } from "@capacitor/core";
 import * as api from "./api";
@@ -46,9 +42,7 @@ const practiceInput = $("#practice-input") as HTMLInputElement;
 const startBtn = $("#start-btn");
 
 const timerText = $("#timer-text");
-const ringProgress = document.querySelector(
-	"#ring-progress",
-) as SVGCircleElement;
+const ringProgress = document.querySelector("#ring-progress") as SVGCircleElement;
 const pauseBtn = $("#pause-btn");
 const stopBtn = $("#stop-btn");
 
@@ -302,10 +296,7 @@ function inertiaStep(): void {
 	velocityX *= INERTIA_FRICTION;
 	velocityY *= INERTIA_FRICTION;
 
-	if (
-		Math.abs(velocityX) < INERTIA_STOP &&
-		Math.abs(velocityY) < INERTIA_STOP
-	) {
+	if (Math.abs(velocityX) < INERTIA_STOP && Math.abs(velocityY) < INERTIA_STOP) {
 		sessionView.classList.remove("dragging");
 		return;
 	}
@@ -327,7 +318,7 @@ sessionView.addEventListener("touchstart", (e) => {
 	/* cancel any running inertia */
 	cancelAnimationFrame(inertiaRafId);
 
-		const t = e.touches[0];
+	const t = e.touches[0];
 	dragStartX = t.clientX;
 	dragStartY = t.clientY;
 	lastTouchX = t.clientX;
@@ -369,10 +360,7 @@ sessionView.addEventListener(
 
 		/* lock axis after first significant movement */
 		if (!dragAxis) {
-			if (
-				Math.abs(dx) < AXIS_LOCK_THRESHOLD &&
-				Math.abs(dy) < AXIS_LOCK_THRESHOLD
-			) {
+			if (Math.abs(dx) < AXIS_LOCK_THRESHOLD && Math.abs(dy) < AXIS_LOCK_THRESHOLD) {
 				return;
 			}
 			dragAxis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
@@ -406,10 +394,7 @@ sessionView.addEventListener("touchend", () => {
 	isDragging = false;
 
 	/* kick off inertia if finger was moving fast enough */
-	if (
-		Math.abs(velocityX) > INERTIA_STOP ||
-		Math.abs(velocityY) > INERTIA_STOP
-	) {
+	if (Math.abs(velocityX) > INERTIA_STOP || Math.abs(velocityY) > INERTIA_STOP) {
 		dragStartTime = dragTarget;
 		inertiaRafId = requestAnimationFrame(inertiaStep);
 	} else {
@@ -488,6 +473,11 @@ onLeaveView("friends-view", leaveFriends);
 $("#friends-nav-btn").addEventListener("click", () => {
 	haptics.tapLight();
 	navigateTo("friends-view", () => openFriends());
+});
+
+$("#timer-nav-btn").addEventListener("click", () => {
+	haptics.tapLight();
+	navigateTo("home-view");
 });
 
 $("#profile-nav-btn").addEventListener("click", () => {

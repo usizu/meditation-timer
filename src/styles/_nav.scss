@@ -3,8 +3,12 @@
 .nav-icons {
 	display: flex;
 	gap: 0.75rem;
-	justify-content: flex-end;
-	margin-bottom: 0.5rem;
+	justify-content: center;
+	align-items: center;
+	position: fixed;
+	bottom: env(safe-area-inset-bottom);
+	width: 100%;
+	height: var(--toolbar-height);
 }
 
 .nav-btn {
