@@ -14,6 +14,9 @@ export default class PushSubscription extends BaseModel {
 	declare subscription: string
 
 	@column()
+	declare type: 'web' | 'apns' | 'fcm'
+
+	@column()
 	declare deviceLabel: string | null
 
 	@column.dateTime({ autoCreate: true })

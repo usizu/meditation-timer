@@ -16,6 +16,7 @@ import {
 	setupWakeLockReacquire,
 } from "./wakelock";
 import "./styles/main.scss";
+import { Capacitor } from "@capacitor/core";
 import * as api from "./api";
 import { checkAuth } from "./auth";
 import { initFriends, loadFriends } from "./friends";
@@ -23,6 +24,13 @@ import { initLogin } from "./login";
 import { initBackButtons, navigateTo, showViewEl } from "./nav";
 import { initProfile, loadProfile } from "./profile";
 import { setupPushNotifications } from "./push";
+
+/* Register service worker for web builds (enables push + offline caching) */
+if (!Capacitor.isNativePlatform()) {
+	import("virtual:pwa-register").then(({ registerSW }) => {
+		registerSW({ immediate: true });
+	});
+}
 
 /* ── Elements ── */
 const $ = (sel: string) => document.querySelector(sel) as HTMLElement;

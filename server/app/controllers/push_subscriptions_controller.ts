@@ -18,28 +18,31 @@ export default class PushSubscriptionsController {
 	async store({ request, response, auth }: HttpContext) {
 		const userId = auth.user!.id
 		const subscription = request.input('subscription')
+		const type = (request.input('type', 'web') as 'web' | 'apns' | 'fcm')
 		const deviceLabel = request.input('deviceLabel') || null
 
 		if (!subscription) {
 			return response.status(400).json({ error: 'subscription is required' })
 		}
 
-		const subscriptionJson = typeof subscription === 'string'
+		const subscriptionValue = typeof subscription === 'string'
 			? subscription
 			: JSON.stringify(subscription)
 
-		/* Avoid duplicates: check if this endpoint already exists */
-		const parsed = JSON.parse(subscriptionJson)
+		/* Avoid duplicates */
 		const existing = await PushSubscription.query()
 			.where('user_id', userId)
 			.exec()
 
 		const alreadyExists = existing.some((sub) => {
-			try {
-				return JSON.parse(sub.subscription).endpoint === parsed.endpoint
-			} catch {
-				return false
+			if (type === 'web') {
+				try {
+					return JSON.parse(sub.subscription).endpoint === JSON.parse(subscriptionValue).endpoint
+				} catch {
+					return false
+				}
 			}
+			return sub.subscription === subscriptionValue
 		})
 
 		if (alreadyExists) {
@@ -48,7 +51,8 @@ export default class PushSubscriptionsController {
 
 		await PushSubscription.create({
 			userId,
-			subscription: subscriptionJson,
+			subscription: subscriptionValue,
+			type,
 			deviceLabel,
 		})
 

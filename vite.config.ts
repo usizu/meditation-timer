@@ -63,6 +63,10 @@ export default defineConfig(({ command }) => {
 						},
 					],
 				},
+				devOptions: {
+					enabled: true,
+					type: "module",
+				},
 				injectManifest: {
 					globPatterns: ["**/*.{js,css,html,png,svg,woff2}"],
 				},

@@ -14,27 +14,24 @@ if (vapidPublicKey && vapidPrivateKey) {
 	)
 }
 
+interface PushPayload {
+	title: string
+	body: string
+	url?: string
+}
+
 export default class PushService {
 	/**
 	 * Send a push notification to all subscriptions of a user.
 	 */
-	static async notifyUser(userId: number, payload: { title: string; body: string; url?: string }) {
-		if (!vapidPublicKey || !vapidPrivateKey) {
-			logger.warn('VAPID keys not configured — skipping push notification')
-			return
-		}
-
+	static async notifyUser(userId: number, payload: PushPayload) {
 		const subscriptions = await PushSubscription.query().where('user_id', userId)
 
 		for (const sub of subscriptions) {
 			try {
-				await webpush.sendNotification(
-					sub.parsedSubscription,
-					JSON.stringify(payload)
-				)
+				await PushService.sendToTransport(sub, payload)
 			} catch (error: any) {
 				if (error.statusCode === 410 || error.statusCode === 404) {
-					/* Subscription expired or invalid — remove it */
 					logger.info({ subscriptionId: sub.id }, 'Removing expired push subscription')
 					await sub.delete()
 				} else {
@@ -47,14 +44,43 @@ export default class PushService {
 	/**
 	 * Send push notifications to multiple users.
 	 */
-	static async notifyUsers(userIds: number[], payload: { title: string; body: string; url?: string }) {
+	static async notifyUsers(userIds: number[], payload: PushPayload) {
 		await Promise.allSettled(
 			userIds.map((userId) => PushService.notifyUser(userId, payload))
 		)
 	}
 
 	/**
-	 * Get the VAPID public key (needed by the client to subscribe).
+	 * Route to the correct transport based on subscription type.
+	 */
+	private static async sendToTransport(sub: PushSubscription, payload: PushPayload) {
+		switch (sub.type) {
+			case 'web':
+				return PushService.sendWeb(sub, payload)
+			case 'apns':
+				logger.warn({ subscriptionId: sub.id }, 'APNs transport not yet implemented')
+				return
+			case 'fcm':
+				logger.warn({ subscriptionId: sub.id }, 'FCM transport not yet implemented')
+				return
+			default:
+				logger.error({ subscriptionId: sub.id, type: sub.type }, 'Unknown push transport type')
+		}
+	}
+
+	/**
+	 * Send via Web Push (VAPID).
+	 */
+	private static async sendWeb(sub: PushSubscription, payload: PushPayload) {
+		if (!vapidPublicKey || !vapidPrivateKey) {
+			logger.warn('VAPID keys not configured — skipping web push')
+			return
+		}
+		await webpush.sendNotification(sub.parsedSubscription, JSON.stringify(payload))
+	}
+
+	/**
+	 * Get the VAPID public key (needed by the web client to subscribe).
 	 */
 	static getVapidPublicKey(): string {
 		return vapidPublicKey

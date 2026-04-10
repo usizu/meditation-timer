@@ -185,12 +185,11 @@ export async function meditationEnd(): Promise<void> {
 /* ── Push (existing) ── */
 
 export async function registerPushSubscription(
-	subscription: PushSubscription,
+	subscription: string,
+	type: "web" | "apns" | "fcm" = "web",
 ): Promise<void> {
 	try {
-		await post("/api/push-subscriptions", {
-			subscription: JSON.stringify(subscription.toJSON()),
-		});
+		await post("/api/push-subscriptions", { subscription, type });
 	} catch {
 		/* non-critical */
 	}

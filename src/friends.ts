@@ -9,6 +9,7 @@ import {
 	apiUpdateToggles,
 } from "./api";
 import { showView } from "./nav";
+import { ensurePushSubscription } from "./push";
 
 const $ = (sel: string) => document.querySelector(sel) as HTMLElement;
 
@@ -108,6 +109,7 @@ function renderFriends(friends: Friend[]): void {
 
 		card.querySelector(".toggle-notify-me")?.addEventListener("change", (e) => {
 			const checked = (e.target as HTMLInputElement).checked;
+			if (checked) ensurePushSubscription();
 			apiUpdateToggles(id, "notifyMe", checked);
 		});
 
