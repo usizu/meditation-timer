@@ -6,11 +6,28 @@
 import { isLoggedIn } from "./auth";
 
 const allViews = () => document.querySelectorAll<HTMLElement>(".view");
+const allNavBtns = () =>
+	document.querySelectorAll<HTMLButtonElement>(".nav-btn[data-view]");
 
 let returnTo: string | null = null;
 let onReturnCallback: (() => void) | null = null;
 let currentView: string | null = null;
 const leaveCallbacks = new Map<string, () => void>();
+
+/** Map of view IDs that each nav button "owns" (including sub-views). */
+const navViewMap = new Map<string, string[]>([
+	["home-view", ["home-view", "session-view", "done-view"]],
+	["friends-view", ["friends-view"]],
+	["profile-view", ["profile-view", "settings-view"]],
+]);
+
+function syncNavActive(activeViewId: string): void {
+	for (const btn of allNavBtns()) {
+		const viewId = btn.dataset.view ?? "";
+		const ownedViews = navViewMap.get(viewId) ?? [viewId];
+		btn.classList.toggle("active", ownedViews.includes(activeViewId));
+	}
+}
 
 /** Register a callback to run when leaving a specific view. */
 export function onLeaveView(viewId: string, callback: () => void): void {
@@ -25,12 +42,14 @@ export function showView(id: string): void {
 	for (const v of allViews()) {
 		v.classList.toggle("active", v.id === id);
 	}
+	syncNavActive(id);
 }
 
 export function showViewEl(el: HTMLElement): void {
 	for (const v of allViews()) {
 		v.classList.toggle("active", v === el);
 	}
+	if (el.id) syncNavActive(el.id);
 }
 
 /**

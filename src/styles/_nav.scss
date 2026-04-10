@@ -26,6 +26,15 @@
 	transition: all 0.2s ease;
 	padding: 4px 22px;
 
+	&.active {
+		background: rgba(var(--primary-rgb), 0.3);
+		border-color: rgba(var(--primary-rgb), 0.5);
+
+		svg {
+			opacity: 1;
+		}
+	}
+
 	&:active {
 		transform: scale(0.92);
 		background: rgba(var(--primary-rgb), 0.25);
