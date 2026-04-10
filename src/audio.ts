@@ -207,7 +207,7 @@ export function create(
 		}
 	});
 
-	/* show app icon as album art on lockscreen — no playback controls */
+	/* show app icon as album art on lockscreen + enable pause/play controls */
 	if ("mediaSession" in navigator) {
 		const base = document.baseURI;
 		navigator.mediaSession.metadata = new MediaMetadata({
@@ -219,6 +219,12 @@ export function create(
 					sizes: "512x512",
 				},
 			],
+		});
+		navigator.mediaSession.setActionHandler("pause", () => {
+			audioEl?.pause();
+		});
+		navigator.mediaSession.setActionHandler("play", () => {
+			audioEl?.play();
 		});
 	}
 }
@@ -266,6 +272,8 @@ export function destroy(): void {
 
 	if ("mediaSession" in navigator) {
 		navigator.mediaSession.metadata = null;
+		navigator.mediaSession.setActionHandler("pause", null);
+		navigator.mediaSession.setActionHandler("play", null);
 	}
 
 	if (audioEl) {
