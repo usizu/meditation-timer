@@ -118,7 +118,7 @@ function startSession(): void {
 	updateRing(0);
 
 	/* Notify server (non-blocking, respects silent mode) */
-	api.meditationStart();
+	api.meditationStart(selectedMinutes);
 
 	audio.create(selectedMinutes, {
 		onTick(curSec, durSec) {

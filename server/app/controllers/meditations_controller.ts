@@ -13,8 +13,9 @@ export default class MeditationsController {
    * Creates a meditation record and determines which friends to notify.
    * Returns JSON (called from the PWA client, not a form).
    */
-  async start({ auth, response }: HttpContext) {
+  async start({ auth, request, response }: HttpContext) {
     const userId = auth.user!.id
+    const durationMinutes: number | null = request.input('durationMinutes', null)
 
     /* End any currently-active meditation first */
     await Meditation.query()
@@ -45,10 +46,14 @@ export default class MeditationsController {
     )
 
     /* Send web push notifications to friends (non-blocking) */
-    const email = auth.user!.email
+    const displayName = auth.user!.nickname || auth.user!.email.split('@')[0]
+    const startedMeditating = `${displayName} started meditating`
+    const duration = durationMinutes ? `🪷 [${durationMinutes} minutes meditation]` : ''
     PushService.notifyUsers(friendIds, {
       title: 'Mugen',
-      body: `${email} started meditating`,
+      body: duration ? `${startedMeditating}\n${duration}` : startedMeditating,
+      webTitle: startedMeditating,
+      webBody: duration || 'meditating',
       url: '/',
     })
 

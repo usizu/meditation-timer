@@ -18,6 +18,9 @@ interface PushPayload {
 	title: string
 	body: string
 	url?: string
+	/** Alternate title/body for web push (iOS PWA already shows app name) */
+	webTitle?: string
+	webBody?: string
 }
 
 export default class PushService {
@@ -76,7 +79,12 @@ export default class PushService {
 			logger.warn('VAPID keys not configured — skipping web push')
 			return
 		}
-		await webpush.sendNotification(sub.parsedSubscription, JSON.stringify(payload))
+		const webPayload = {
+			title: payload.webTitle || payload.title,
+			body: payload.webBody || payload.body,
+			url: payload.url,
+		}
+		await webpush.sendNotification(sub.parsedSubscription, JSON.stringify(webPayload))
 	}
 
 	/**
