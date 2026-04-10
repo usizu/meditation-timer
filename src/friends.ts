@@ -2,12 +2,7 @@
  * Friends view — loads friend data from API and renders into the DOM.
  */
 
-import {
-	apiAddFriend,
-	apiFriends,
-	apiRemoveFriend,
-	apiUpdateToggles,
-} from "./api";
+import { apiAddFriend, apiFriends, apiRemoveFriend, apiUpdateToggles } from "./api";
 import { getCachedUser } from "./auth";
 import { showView } from "./nav";
 import { ensurePushSubscription } from "./push";
@@ -50,8 +45,7 @@ export function initFriends(): void {
 			emailInput.value = "";
 			await loadFriends();
 		} catch (err: unknown) {
-			msgEl.textContent =
-				err instanceof Error ? err.message : "Failed to add friend.";
+			msgEl.textContent = err instanceof Error ? err.message : "Failed to add friend.";
 			msgEl.classList.remove("hidden");
 		}
 	});
@@ -83,8 +77,7 @@ function friendTimeInfo(friendTz: string, myTz: string) {
 		minute: "2-digit",
 	}).format(now);
 
-	const diffH =
-		Math.round(offsetMinutes(friendTz, now) - offsetMinutes(myTz, now)) / 60;
+	const diffH = Math.round(offsetMinutes(friendTz, now) - offsetMinutes(myTz, now)) / 60;
 	let offset = "";
 	if (diffH === 0) {
 		offset = "same time";
@@ -126,14 +119,12 @@ function renderFriends(friends: Friend[]): void {
 	const container = $("#friends-list");
 
 	if (friends.length === 0) {
-		container.innerHTML =
-			'<p class="empty-state">No friends yet. Add someone above!</p>';
+		container.innerHTML = '<p class="empty-state">No friends yet. Add someone above!</p>';
 		return;
 	}
 
 	const myTz =
-		getCachedUser()?.timezone ??
-		Intl.DateTimeFormat().resolvedOptions().timeZone;
+		getCachedUser()?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 	container.innerHTML = friends
 		.map((f) => {
@@ -142,8 +133,8 @@ function renderFriends(friends: Friend[]): void {
 			return `
 		<div class="friend-card" data-id="${f.id}" data-user-id="${f.userId}" data-daycycle="${ti.daycycle}">
 			<div class="friend-info">
-				<span class="friend-name">${displayName}</span>
 				<span class="friend-online${f.isOnline ? "" : " hidden"}"></span>
+				<span class="friend-name">${displayName}</span>
 				<span class="friend-meditating${f.isMeditating ? "" : " hidden"}">meditating</span>
 				<span class="friend-time">${esc(ti.localTime)}</span>
 				<span class="friend-offset">${esc(ti.offset)}</span>
@@ -171,12 +162,10 @@ function renderFriends(friends: Friend[]): void {
 	for (const card of container.querySelectorAll<HTMLElement>(".friend-card")) {
 		const id = Number(card.dataset.id);
 
-		card
-			.querySelector(".toggle-notify-them")
-			?.addEventListener("change", (e) => {
-				const checked = (e.target as HTMLInputElement).checked;
-				apiUpdateToggles(id, "notifyThem", checked);
-			});
+		card.querySelector(".toggle-notify-them")?.addEventListener("change", (e) => {
+			const checked = (e.target as HTMLInputElement).checked;
+			apiUpdateToggles(id, "notifyThem", checked);
+		});
 
 		card.querySelector(".toggle-notify-me")?.addEventListener("change", (e) => {
 			const checked = (e.target as HTMLInputElement).checked;
@@ -184,12 +173,10 @@ function renderFriends(friends: Friend[]): void {
 			apiUpdateToggles(id, "notifyMe", checked);
 		});
 
-		card
-			.querySelector(".remove-friend-btn")
-			?.addEventListener("click", async () => {
-				await apiRemoveFriend(id);
-				await loadFriends();
-			});
+		card.querySelector(".remove-friend-btn")?.addEventListener("click", async () => {
+			await apiRemoveFriend(id);
+			await loadFriends();
+		});
 	}
 }
 
@@ -234,12 +221,10 @@ function renderPending(
 			}
 		});
 
-		card
-			.querySelector(".remove-pending-btn")
-			?.addEventListener("click", async () => {
-				await apiRemoveFriend(id);
-				await loadFriends();
-			});
+		card.querySelector(".remove-pending-btn")?.addEventListener("click", async () => {
+			await apiRemoveFriend(id);
+			await loadFriends();
+		});
 	}
 }
 
@@ -257,9 +242,7 @@ export function openFriends(): void {
 		onSseEvent("friend:meditating", (data) => {
 			const userId = data.userId as number;
 			const isMeditating = data.isMeditating as boolean;
-			const card = document.querySelector(
-				`.friend-card[data-user-id="${userId}"]`,
-			);
+			const card = document.querySelector(`.friend-card[data-user-id="${userId}"]`);
 			if (!card) return;
 			const badge = card.querySelector(".friend-meditating");
 			if (badge) {
