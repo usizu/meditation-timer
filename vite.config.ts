@@ -88,6 +88,12 @@ export default defineConfig(({ command }) => {
 		server: {
 			host: "0.0.0.0",
 			allowedHosts: true,
+			https: {
+				key: readFileSync(
+					new URL(".certs/localhost+2-key.pem", import.meta.url),
+				),
+				cert: readFileSync(new URL(".certs/localhost+2.pem", import.meta.url)),
+			},
 			proxy: {
 				"/api": "http://localhost:3333",
 				"/auth": "http://localhost:3333",

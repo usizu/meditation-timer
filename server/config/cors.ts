@@ -5,6 +5,7 @@ const corsConfig = defineConfig({
 	origin: [
 		'capacitor://localhost',
 		'http://localhost',
+		'https://localhost',
 		'https://mugen.usizu.xyz',
 	],
 	methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
