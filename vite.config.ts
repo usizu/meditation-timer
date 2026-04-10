@@ -37,9 +37,9 @@ export default defineConfig(({ command }) => {
 				srcDir: "src",
 				filename: "sw.ts",
 				manifest: {
-					name: isDev ? "Kitty [Dev]" : "Kitty Timer",
-					short_name: isDev ? "Kitty [Dev]" : "Kitty Timer",
-					description: "A kitty meditation timer",
+					name: isDev ? "Mu [Dev]" : "Mugen",
+					short_name: isDev ? "Mu [Dev]" : "Mugen",
+					description: "Boundless",
 					theme_color: "#1a0e2e",
 					background_color: "#1a0e2e",
 					display: "standalone",
@@ -89,9 +89,7 @@ export default defineConfig(({ command }) => {
 			host: "0.0.0.0",
 			allowedHosts: true,
 			https: {
-				key: readFileSync(
-					new URL(".certs/localhost+2-key.pem", import.meta.url),
-				),
+				key: readFileSync(new URL(".certs/localhost+2-key.pem", import.meta.url)),
 				cert: readFileSync(new URL(".certs/localhost+2.pem", import.meta.url)),
 			},
 			proxy: {
