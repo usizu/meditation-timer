@@ -16,6 +16,7 @@ export default class MeditationsController {
   async start({ auth, request, response }: HttpContext) {
     const userId = auth.user!.id
     const durationMinutes: number | null = request.input('durationMinutes', null)
+    const practice: string = request.input('practice', '') || auth.user!.status || ''
 
     /* End any currently-active meditation first */
     await Meditation.query()
@@ -27,6 +28,7 @@ export default class MeditationsController {
     const meditation = await Meditation.create({
       userId,
       startedAt: DateTime.now(),
+      practice: practice || null,
     })
 
     /* Find friends who should be notified */
@@ -44,16 +46,21 @@ export default class MeditationsController {
       `#friend-status-${userId}`,
       `<span id="friend-status-${userId}" class="meditating-indicator">meditating</span>`
     )
+    sseManager.broadcastJson(friendIds, 'friend:meditating', { userId, isMeditating: true })
 
     /* Send web push notifications to friends (non-blocking) */
     const displayName = auth.user!.nickname || auth.user!.email.split('@')[0]
     const startedMeditating = `${displayName} started meditating`
-    const duration = durationMinutes ? `🪷 [${durationMinutes} minutes meditation]` : ''
+    const details = [
+      durationMinutes ? `${durationMinutes} mins` : '',
+      practice,
+    ].filter(Boolean).join(' · ')
+    const detail = details ? `🪷 ${details}` : ''
     PushService.notifyUsers(friendIds, {
       title: 'Mugen',
-      body: duration ? `${startedMeditating}\n${duration}` : startedMeditating,
+      body: detail ? `${startedMeditating}\n${detail}` : startedMeditating,
       webTitle: startedMeditating,
-      webBody: duration || 'meditating',
+      webBody: detail || 'meditating',
       url: '/',
     })
 
@@ -93,6 +100,7 @@ export default class MeditationsController {
       `#friend-status-${userId}`,
       `<span id="friend-status-${userId}"></span>`
     )
+    sseManager.broadcastJson(allFriends, 'friend:meditating', { userId, isMeditating: false })
 
     return response.json({
       id: meditation.id,

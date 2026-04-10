@@ -9,9 +9,13 @@ import ApiToken from '#models/api_token'
 export default class ApiAuthMiddleware {
 	async handle(ctx: HttpContext, next: NextFn) {
 		const authHeader = ctx.request.header('authorization')
+		/* EventSource can't send headers, so also accept ?token= query param */
+		const queryToken = ctx.request.input('token') as string | undefined
 
-		if (authHeader?.startsWith('Bearer ')) {
-			const plaintext = authHeader.slice(7)
+		const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined
+		const plaintext = bearerToken || queryToken
+
+		if (plaintext) {
 			const record = await ApiToken.verify(plaintext)
 
 			if (record) {

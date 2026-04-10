@@ -9,8 +9,19 @@ const allViews = () => document.querySelectorAll<HTMLElement>(".view");
 
 let returnTo: string | null = null;
 let onReturnCallback: (() => void) | null = null;
+let currentView: string | null = null;
+const leaveCallbacks = new Map<string, () => void>();
+
+/** Register a callback to run when leaving a specific view. */
+export function onLeaveView(viewId: string, callback: () => void): void {
+	leaveCallbacks.set(viewId, callback);
+}
 
 export function showView(id: string): void {
+	if (currentView && currentView !== id) {
+		leaveCallbacks.get(currentView)?.();
+	}
+	currentView = id;
 	for (const v of allViews()) {
 		v.classList.toggle("active", v.id === id);
 	}

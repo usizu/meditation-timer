@@ -62,16 +62,24 @@ body {
 	z-index: 1;
 	height: 100%;
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: center;
 	opacity: 0;
 	pointer-events: none;
 	transition: opacity 0.25s ease;
+	padding-top: 5dvh;
 
 	&.active {
 		opacity: 1;
 		pointer-events: auto;
 	}
+}
+
+/* Content sections */
+
+div[class*="-content"] {
+	display: flex;
+	gap: 1rem;
 }
 
 /* ── Home ── */
@@ -228,6 +236,27 @@ body {
 	}
 }
 
+#practice-input {
+	background: rgba(var(--primary-rgb), 0.08);
+	border: 1px solid rgba(var(--primary-rgb), 0.25);
+	border-radius: 0.75rem;
+	padding: 0.5rem 0.75rem;
+	color: var(--text);
+	font-size: 0.85rem;
+	text-align: center;
+	outline: none;
+	width: 100%;
+	max-width: 16rem;
+
+	&:focus {
+		border-color: var(--primary);
+	}
+
+	&::placeholder {
+		color: var(--text-dim);
+	}
+}
+
 .glow-btn {
 	background: linear-gradient(135deg, var(--primary), var(--primary-dark));
 	border: none;
@@ -240,7 +269,6 @@ body {
 	cursor: pointer;
 	transition: all 0.3s ease;
 	box-shadow: 0 0 20px var(--glow-purple);
-	margin-top: 0.5rem;
 
 	&:hover {
 		box-shadow:
@@ -383,35 +411,45 @@ body {
 	}
 }
 
+/* Session */
+
+#session-view,
+#done-view {
+	align-items: center;
+	padding-top: 0;
+}
+
 /* ── Paused state ── */
 
-#session-view.paused {
-	.timer-ring-container,
-	.control-btn--stop {
-		opacity: 0.35;
-		transition: opacity 0.4s ease;
-	}
+#session-view {
+	&.paused {
+		.timer-ring-container,
+		.control-btn--stop {
+			opacity: 0.35;
+			transition: opacity 0.4s ease;
+		}
 
-	.ring-progress {
-		filter: none;
-		stroke: rgba(var(--primary-rgb), 0.3);
-	}
+		.ring-progress {
+			filter: none;
+			stroke: rgba(var(--primary-rgb), 0.3);
+		}
 
-	.timer-display span {
-		color: var(--text-dim);
-	}
+		.timer-display span {
+			color: var(--text-dim);
+		}
 
-	.breath-ring {
-		animation-play-state: paused;
-		opacity: 0.15;
-	}
+		.breath-ring {
+			animation-play-state: paused;
+			opacity: 0.15;
+		}
 
-	/* keep resume button vivid */
-	#pause-btn {
-		opacity: 1;
-		border-color: var(--accent);
-		color: var(--accent);
-		box-shadow: 0 0 12px var(--glow-accent);
+		/* keep resume button vivid */
+		#pause-btn {
+			opacity: 1;
+			border-color: var(--accent);
+			color: var(--accent);
+			box-shadow: 0 0 12px var(--glow-accent);
+		}
 	}
 }
 

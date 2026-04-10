@@ -164,10 +164,13 @@ export async function apiUpdateProfile(data: {
 
 /* ── Meditations (existing) ── */
 
-export async function meditationStart(durationMinutes: number): Promise<void> {
+export async function meditationStart(
+	durationMinutes: number,
+	practice?: string,
+): Promise<void> {
 	if (isSilentMode()) return;
 	try {
-		await post("/api/meditations/start", { durationMinutes });
+		await post("/api/meditations/start", { durationMinutes, practice });
 	} catch {
 		/* server unreachable — meditation still works locally */
 	}

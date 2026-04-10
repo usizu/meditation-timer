@@ -18,10 +18,10 @@ import {
 import "./styles/main.scss";
 import { Capacitor } from "@capacitor/core";
 import * as api from "./api";
-import { checkAuth } from "./auth";
-import { initFriends, loadFriends } from "./friends";
+import { checkAuth, getCachedUser } from "./auth";
+import { initFriends, leaveFriends, openFriends } from "./friends";
 import { initLogin } from "./login";
-import { initBackButtons, navigateTo, showViewEl } from "./nav";
+import { initBackButtons, navigateTo, onLeaveView, showViewEl } from "./nav";
 import { initProfile, loadProfile } from "./profile";
 import { setupPushNotifications } from "./push";
 
@@ -41,6 +41,7 @@ const doneView = $("#done-view");
 
 const presetBtns = document.querySelectorAll<HTMLButtonElement>(".preset");
 const customInput = $("#custom-minutes") as HTMLInputElement;
+const practiceInput = $("#practice-input") as HTMLInputElement;
 const startBtn = $("#start-btn");
 
 const timerText = $("#timer-text");
@@ -118,7 +119,8 @@ function startSession(): void {
 	updateRing(0);
 
 	/* Notify server (non-blocking, respects silent mode) */
-	api.meditationStart(selectedMinutes);
+	const practice = practiceInput.value.trim() || undefined;
+	api.meditationStart(selectedMinutes, practice);
 
 	audio.create(selectedMinutes, {
 		onTick(curSec, durSec) {
@@ -471,10 +473,11 @@ initBackButtons();
 initLogin();
 initFriends();
 initProfile();
+onLeaveView("friends-view", leaveFriends);
 
 $("#friends-nav-btn").addEventListener("click", () => {
 	haptics.tapLight();
-	navigateTo("friends-view", () => loadFriends());
+	navigateTo("friends-view", () => openFriends());
 });
 
 $("#profile-nav-btn").addEventListener("click", () => {
@@ -483,4 +486,9 @@ $("#profile-nav-btn").addEventListener("click", () => {
 });
 
 /* Silent auth check — populate user cache, don't block timer */
-checkAuth();
+checkAuth().then(() => {
+	const user = getCachedUser();
+	if (user?.status && !practiceInput.value) {
+		practiceInput.value = user.status;
+	}
+});

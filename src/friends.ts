@@ -8,8 +8,10 @@ import {
 	apiRemoveFriend,
 	apiUpdateToggles,
 } from "./api";
+import { getCachedUser } from "./auth";
 import { showView } from "./nav";
 import { ensurePushSubscription } from "./push";
+import { closeSse, connectSse, onSseEvent } from "./sse";
 
 const $ = (sel: string) => document.querySelector(sel) as HTMLElement;
 
@@ -17,10 +19,13 @@ interface Friend {
 	id: number;
 	userId: number;
 	email: string;
+	nickname: string | null;
 	timezone: string;
+	practice: string | null;
 	notifyThem: boolean;
 	notifyMe: boolean;
 	isMeditating: boolean;
+	isOnline: boolean;
 }
 
 interface PendingItem {
@@ -63,6 +68,60 @@ export async function loadFriends(): Promise<void> {
 	}
 }
 
+/**
+ * Compute the current local time for a given IANA timezone,
+ * plus a human-readable offset relative to the viewer's timezone.
+ * Also returns whether it's day or night (6am–6pm = day).
+ */
+function friendTimeInfo(friendTz: string, myTz: string) {
+	const now = Date.now();
+	const friendHour = hourInTz(friendTz, now);
+
+	const localTime = new Intl.DateTimeFormat(undefined, {
+		timeZone: friendTz,
+		hour: "numeric",
+		minute: "2-digit",
+	}).format(now);
+
+	const diffH =
+		Math.round(offsetMinutes(friendTz, now) - offsetMinutes(myTz, now)) / 60;
+	let offset = "";
+	if (diffH === 0) {
+		offset = "same time";
+	} else {
+		const abs = Math.abs(diffH);
+		const label = abs === 1 ? "hr" : "hrs";
+		offset = `${abs}${label} ${diffH > 0 ? "ahead" : "behind"}`;
+	}
+
+	const daycycle = friendHour >= 6 && friendHour < 18 ? "day" : "night";
+
+	return { localTime, offset, daycycle };
+}
+
+function hourInTz(tz: string, now: number): number {
+	const parts = new Intl.DateTimeFormat("en-US", {
+		timeZone: tz,
+		hour: "numeric",
+		hour12: false,
+	}).formatToParts(new Date(now));
+	return Number(parts.find((p) => p.type === "hour")?.value ?? 0);
+}
+
+function offsetMinutes(tz: string, now: number): number {
+	const fmt = new Intl.DateTimeFormat("en-US", {
+		timeZone: tz,
+		timeZoneName: "shortOffset",
+	});
+	const parts = fmt.formatToParts(new Date(now));
+	const offsetStr = parts.find((p) => p.type === "timeZoneName")?.value ?? "";
+	const m = offsetStr.match(/GMT([+-]?\d+)(?::(\d+))?/);
+	if (!m) return 0;
+	const h = Number(m[1]);
+	const min = Number(m[2] ?? 0);
+	return h * 60 + (h < 0 ? -min : min);
+}
+
 function renderFriends(friends: Friend[]): void {
 	const container = $("#friends-list");
 
@@ -72,13 +131,25 @@ function renderFriends(friends: Friend[]): void {
 		return;
 	}
 
+	const myTz =
+		getCachedUser()?.timezone ??
+		Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 	container.innerHTML = friends
-		.map(
-			(f) => `
-		<div class="friend-card" data-id="${f.id}">
+		.map((f) => {
+			const ti = friendTimeInfo(f.timezone, myTz);
+			const displayName = f.nickname ? esc(f.nickname) : esc(f.email);
+			return `
+		<div class="friend-card" data-id="${f.id}" data-user-id="${f.userId}" data-daycycle="${ti.daycycle}">
 			<div class="friend-info">
-				<span class="friend-email">${esc(f.email)}</span>
-				${f.isMeditating ? '<span class="friend-meditating">meditating</span>' : ""}
+				<span class="friend-name">${displayName}</span>
+				<span class="friend-online${f.isOnline ? "" : " hidden"}"></span>
+				<span class="friend-meditating${f.isMeditating ? "" : " hidden"}">meditating</span>
+				<span class="friend-time">${esc(ti.localTime)}</span>
+				<span class="friend-offset">${esc(ti.offset)}</span>
+			</div>
+			<div class="friend-meta">
+				<span class="friend-practice${f.practice ? "" : " hidden"}">${f.practice ? esc(f.practice) : ""}</span>
 				<span class="friend-tz">${esc(f.timezone)}</span>
 			</div>
 			<div class="friend-actions">
@@ -92,8 +163,8 @@ function renderFriends(friends: Friend[]): void {
 				</label>
 				<button type="button" class="remove-friend-btn">Remove</button>
 			</div>
-		</div>`,
-		)
+		</div>`;
+		})
 		.join("");
 
 	/* wire toggle + remove handlers */
@@ -172,10 +243,57 @@ function renderPending(
 	}
 }
 
+let sseCleanups: (() => void)[] = [];
+
 /** Navigate to friends view and load data. */
 export function openFriends(): void {
 	showView("friends-view");
 	loadFriends();
+
+	/* Connect to SSE and listen for live friend updates */
+	connectSse();
+
+	sseCleanups.push(
+		onSseEvent("friend:meditating", (data) => {
+			const userId = data.userId as number;
+			const isMeditating = data.isMeditating as boolean;
+			const card = document.querySelector(
+				`.friend-card[data-user-id="${userId}"]`,
+			);
+			if (!card) return;
+			const badge = card.querySelector(".friend-meditating");
+			if (badge) {
+				badge.classList.toggle("hidden", !isMeditating);
+			}
+		}),
+	);
+
+	sseCleanups.push(
+		onSseEvent("friend:online", (data) => {
+			const userId = data.userId as number;
+			const dot = document.querySelector(
+				`.friend-card[data-user-id="${userId}"] .friend-online`,
+			);
+			if (dot) dot.classList.remove("hidden");
+		}),
+	);
+
+	sseCleanups.push(
+		onSseEvent("friend:offline", (data) => {
+			const userId = data.userId as number;
+			const dot = document.querySelector(
+				`.friend-card[data-user-id="${userId}"] .friend-online`,
+			);
+			if (dot) dot.classList.add("hidden");
+		}),
+	);
+}
+
+/** Called when leaving the friends view. */
+export function leaveFriends(): void {
+	for (const cleanup of sseCleanups) cleanup();
+	sseCleanups = [];
+	closeSse();
 }
 
 function esc(s: string): string {

@@ -66,6 +66,13 @@
 	border-radius: 0.75rem;
 	padding: 0.75rem;
 	margin-bottom: 0.5rem;
+	gap: 0.5rem;
+	display: flex;
+	flex-wrap: wrap;
+
+	& > div {
+		flex-grow: 1;
+	}
 }
 
 .friend-info {
@@ -76,9 +83,22 @@
 	margin-bottom: 0.4rem;
 }
 
-.friend-email {
+.friend-name {
 	color: var(--text);
 	font-size: 0.9rem;
+}
+
+.friend-online {
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background: var(--accent);
+	flex-shrink: 0;
+	box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.6);
+
+	&.hidden {
+		display: none;
+	}
 }
 
 .friend-meditating {
@@ -89,6 +109,37 @@
 	border-radius: 1rem;
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
+
+	&.hidden {
+		display: none;
+	}
+}
+
+.friend-time {
+	color: var(--text);
+	font-size: 0.8rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.friend-offset {
+	color: var(--text-dim);
+	font-size: 0.7rem;
+}
+
+.friend-meta {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.friend-practice {
+	color: var(--text);
+	font-size: 0.75rem;
+	font-style: italic;
+
+	&.hidden {
+		display: none;
+	}
 }
 
 .friend-tz {
@@ -96,9 +147,19 @@
 	font-size: 0.75rem;
 }
 
+/* Day/night indicator */
+.friend-card[data-daycycle="day"] .friend-time::before {
+	content: "☀ ";
+}
+
+.friend-card[data-daycycle="night"] .friend-time::before {
+	content: "☾ ";
+}
+
 .friend-actions {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: 0.75rem;
 	flex-wrap: wrap;
 }

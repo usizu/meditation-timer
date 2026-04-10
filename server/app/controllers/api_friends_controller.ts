@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Friendship from '#models/friendship'
 import Meditation from '#models/meditation'
 import User from '#models/user'
+import sseManager from '#services/sse_manager'
 
 export default class ApiFriendsController {
 	/**
@@ -39,18 +40,36 @@ export default class ApiFriendsController {
 				: []
 		const meditatingUserIds = new Set(activeMeditations.map((m) => m.userId))
 
+		/* Latest meditation per friend (for practice field) */
+		const latestMeditations =
+			friendUserIds.length > 0
+				? await Meditation.query()
+						.whereIn('user_id', friendUserIds)
+						.whereNotNull('practice')
+						.orderBy('started_at', 'desc')
+				: []
+		const latestByUser = new Map<number, Meditation>()
+		for (const m of latestMeditations) {
+			if (!latestByUser.has(m.userId)) latestByUser.set(m.userId, m)
+		}
+
 		const friends = confirmed.map((f) => {
 			const isA = f.userAId === userId
 			const friend = isA ? f.userB : f.userA
 			const toggles = f.togglesFor(userId)
+			const lastMeditation = latestByUser.get(friend.id)
+			const practice = lastMeditation?.practice || friend.status || null
 			return {
 				id: f.id,
 				userId: friend.id,
 				email: friend.email,
+				nickname: friend.nickname,
 				timezone: friend.timezone,
+				practice,
 				notifyThem: toggles.notifyThem,
 				notifyMe: toggles.notifyMe,
 				isMeditating: meditatingUserIds.has(friend.id),
+				isOnline: sseManager.isConnected(friend.id),
 			}
 		})
 

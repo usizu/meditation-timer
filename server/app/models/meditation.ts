@@ -16,6 +16,9 @@ export default class Meditation extends BaseModel {
 	@column.dateTime()
 	declare endedAt: DateTime | null
 
+	@column()
+	declare practice: string | null
+
 	@belongsTo(() => User)
 	declare user: BelongsTo<typeof User>
 

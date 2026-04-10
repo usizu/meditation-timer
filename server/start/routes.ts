@@ -81,6 +81,9 @@ router
 		router
 			.delete('/push-subscriptions/:id', [PushSubscriptionsController, 'destroy'])
 			.use(middleware.apiAuth())
+
+		/* SSE stream for real-time events */
+		router.get('/sse/updates', [SseController, 'apiUpdates']).use(middleware.apiAuth())
 	})
 	.prefix('/api')
 
