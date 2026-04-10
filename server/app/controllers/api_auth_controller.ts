@@ -64,7 +64,7 @@ export default class ApiAuthController {
 
 		return response.json({
 			apiToken: plaintext,
-			user: { id: user.id, email: user.email, timezone: user.timezone },
+			user: { id: user.id, email: user.email, timezone: user.timezone, nickname: user.nickname, status: user.status },
 		})
 	}
 
@@ -89,7 +89,7 @@ export default class ApiAuthController {
 	async check({ auth, response }: HttpContext) {
 		const user = auth.user!
 		return response.json({
-			user: { id: user.id, email: user.email, timezone: user.timezone },
+			user: { id: user.id, email: user.email, timezone: user.timezone, nickname: user.nickname, status: user.status },
 		})
 	}
 }

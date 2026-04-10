@@ -19,6 +19,8 @@ export interface AuthUser {
 	id: number;
 	email: string;
 	timezone: string;
+	nickname: string | null;
+	status: string | null;
 }
 
 const USER_KEY = "kitty-timer-user";

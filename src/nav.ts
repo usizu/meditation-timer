@@ -8,6 +8,7 @@ import { isLoggedIn } from "./auth";
 const allViews = () => document.querySelectorAll<HTMLElement>(".view");
 
 let returnTo: string | null = null;
+let onReturnCallback: (() => void) | null = null;
 
 export function showView(id: string): void {
 	for (const v of allViews()) {
@@ -23,25 +24,31 @@ export function showViewEl(el: HTMLElement): void {
 
 /**
  * Navigate to a view, auth-gating social views.
- * If not logged in, shows login and stores returnTo.
+ * If not logged in, shows login, stores returnTo, and runs onReady after login.
  */
-export function navigateTo(viewId: string): void {
+export function navigateTo(viewId: string, onReady?: () => void): boolean {
 	const needsAuth = viewId === "friends-view" || viewId === "profile-view";
 
 	if (needsAuth && !isLoggedIn()) {
 		returnTo = viewId;
+		onReturnCallback = onReady ?? null;
 		showView("login-view");
-		return;
+		return false;
 	}
 
 	showView(viewId);
+	onReady?.();
+	return true;
 }
 
 /** After successful login, navigate to the original destination or home. */
 export function completeLogin(): void {
 	const dest = returnTo || "home-view";
+	const cb = onReturnCallback;
 	returnTo = null;
+	onReturnCallback = null;
 	showView(dest);
+	cb?.();
 }
 
 /** Wire up all back buttons. */

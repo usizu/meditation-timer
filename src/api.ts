@@ -154,7 +154,11 @@ export async function apiProfile() {
 	return get("/api/profile");
 }
 
-export async function apiUpdateProfile(data: { timezone?: string }) {
+export async function apiUpdateProfile(data: {
+	timezone?: string;
+	nickname?: string;
+	status?: string;
+}) {
 	return post("/api/profile", data);
 }
 

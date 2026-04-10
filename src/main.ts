@@ -21,7 +21,7 @@ import { checkAuth } from "./auth";
 import { initFriends, loadFriends } from "./friends";
 import { initLogin } from "./login";
 import { initBackButtons, navigateTo, showViewEl } from "./nav";
-import { initProfile } from "./profile";
+import { initProfile, loadProfile } from "./profile";
 import { setupPushNotifications } from "./push";
 
 /* ── Elements ── */
@@ -449,7 +449,7 @@ if (import.meta.env.DEV) {
 			DRAG_SENS_Y = v;
 		}),
 	);
-	sessionView.appendChild(devBar);
+	document.getElementById("app")!.appendChild(devBar);
 }
 
 /* ── Wake lock reacquire ── */
@@ -466,13 +466,12 @@ initProfile();
 
 $("#friends-nav-btn").addEventListener("click", () => {
 	haptics.tapLight();
-	navigateTo("friends-view");
-	loadFriends();
+	navigateTo("friends-view", () => loadFriends());
 });
 
 $("#profile-nav-btn").addEventListener("click", () => {
 	haptics.tapLight();
-	navigateTo("profile-view");
+	navigateTo("profile-view", () => loadProfile());
 });
 
 /* Silent auth check — populate user cache, don't block timer */

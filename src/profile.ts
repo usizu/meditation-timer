@@ -10,6 +10,8 @@ const $ = (sel: string) => document.querySelector(sel) as HTMLElement;
 
 export function initProfile(): void {
 	const tzSelect = $("#profile-timezone") as HTMLSelectElement;
+	const nicknameInput = $("#profile-nickname") as HTMLInputElement;
+	const statusInput = $("#profile-status") as HTMLInputElement;
 	const logoutBtn = $("#logout-btn");
 
 	/* Populate timezone options */
@@ -29,6 +31,23 @@ export function initProfile(): void {
 		}
 	});
 
+	/* Save nickname/status on blur */
+	nicknameInput.addEventListener("change", async () => {
+		try {
+			await apiUpdateProfile({ nickname: nicknameInput.value });
+		} catch {
+			/* non-critical */
+		}
+	});
+
+	statusInput.addEventListener("change", async () => {
+		try {
+			await apiUpdateProfile({ status: statusInput.value });
+		} catch {
+			/* non-critical */
+		}
+	});
+
 	logoutBtn.addEventListener("click", async () => {
 		await logout();
 		showView("home-view");
@@ -38,12 +57,16 @@ export function initProfile(): void {
 export async function loadProfile(): Promise<void> {
 	const emailEl = $("#profile-email");
 	const tzSelect = $("#profile-timezone") as HTMLSelectElement;
+	const nicknameInput = $("#profile-nickname") as HTMLInputElement;
+	const statusInput = $("#profile-status") as HTMLInputElement;
 
 	/* Show cached data immediately */
 	const cached = getCachedUser();
 	if (cached) {
 		emailEl.textContent = cached.email;
 		tzSelect.value = cached.timezone;
+		nicknameInput.value = cached.nickname ?? "";
+		statusInput.value = cached.status ?? "";
 	}
 
 	/* Fetch fresh data */
@@ -51,6 +74,8 @@ export async function loadProfile(): Promise<void> {
 		const data = await apiProfile();
 		emailEl.textContent = data.user.email;
 		tzSelect.value = data.user.timezone;
+		nicknameInput.value = data.user.nickname ?? "";
+		statusInput.value = data.user.status ?? "";
 	} catch {
 		/* use cached */
 	}

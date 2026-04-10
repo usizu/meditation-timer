@@ -42,6 +42,26 @@
 	font-size: 0.95rem;
 }
 
+.profile-input {
+	background: rgba(var(--primary-rgb), 0.08);
+	border: 1px solid var(--outline);
+	border-radius: 0.75rem;
+	padding: 0.6rem 0.75rem;
+	color: var(--text);
+	font-size: 0.9rem;
+	outline: none;
+	width: 100%;
+	box-sizing: border-box;
+
+	&::placeholder {
+		color: var(--text-dim);
+	}
+
+	&:focus {
+		border-color: var(--primary);
+	}
+}
+
 .profile-select {
 	background: rgba(var(--primary-rgb), 0.08);
 	border: 1px solid var(--outline);
