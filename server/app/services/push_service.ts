@@ -8,7 +8,7 @@ const vapidPrivateKey = env.get('VAPID_PRIVATE_KEY', '')
 
 if (vapidPublicKey && vapidPrivateKey) {
 	webpush.setVapidDetails(
-		env.get('APP_URL', 'http://localhost:3333'),
+		env.get('VAPID_SUBJECT', 'mailto:dev@localhost'),
 		vapidPublicKey,
 		vapidPrivateKey
 	)
