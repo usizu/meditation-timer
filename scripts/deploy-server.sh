@@ -10,8 +10,9 @@ BRANCH="prod"
 
 echo "🚀 Deploying $APP_NAME to $VPS..."
 
-ssh "$VPS" bash -l <<'REMOTE'
+ssh "$VPS" bash <<'REMOTE'
 set -euo pipefail
+source /root/.nvm/nvm.sh
 
 APP_DIR="/var/www/apps/mugen"
 PM2="/root/.bun/bin/pm2"
