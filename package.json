@@ -1,6 +1,6 @@
 {
 	"name": "kitty-timer",
-	"version": "1.0.74",
+	"version": "1.0.75",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -19,7 +19,7 @@
 		"lint": "oxlint . && biome check .",
 		"typecheck": "tsgo --noEmit",
 		"typecheck:server": "cd server && tsgo --noEmit",
-	"deploy:server": "ssh contabovps -t 'cd /var/www/apps/mugen && git pull origin prod && pnpm install && pnpm exec vite build && cd server && pnpm install && node ace build && cd build && pnpm install --prod && node ace migration:run && pm2 restart mugen'"
+		"deploy:server": "./scripts/deploy-server.sh"
 	},
 	"devDependencies": {
 		"@capacitor/cli": "^8.3.0",
