@@ -20,8 +20,9 @@ function bumpPatch(): string {
 }
 
 export default defineConfig(({ command }) => {
-	/* only bump on production build, not dev server */
-	const version = command === "build" ? bumpPatch() : readVersion();
+	/* only bump on local builds, not dev server or CI/deploy */
+	const version =
+		command === "build" && !process.env.CI ? bumpPatch() : readVersion();
 
 	/* Capacitor builds serve from local files — use relative base */
 	const isCap = !!process.env.CAP;

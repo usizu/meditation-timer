@@ -21,13 +21,14 @@ BRANCH="prod"
 cd "$APP_DIR"
 
 echo "📥 Pulling latest..."
+git checkout package.json
 git pull origin "$BRANCH"
 
 echo "📦 Installing frontend deps..."
 pnpm install
 
 echo "🔨 Building frontend..."
-pnpm exec vite build
+CI=1 pnpm exec vite build
 
 echo "📦 Installing server deps..."
 cd "$APP_DIR/server"
