@@ -77,6 +77,15 @@ export default defineConfig(({ command }) => {
 	return {
 		base: isCap ? "./" : "/meditation-timer/",
 
+		build: {
+			rollupOptions: {
+				/* When building for Capacitor the PWA plugin is disabled,
+				   so the virtual module won't resolve. Mark it external —
+				   the dynamic import is already guarded by a native-platform check. */
+				external: isCap ? ["virtual:pwa-register"] : [],
+			},
+		},
+
 		css: {
 			devSourcemap: true,
 		},
@@ -88,10 +97,12 @@ export default defineConfig(({ command }) => {
 		server: {
 			host: "0.0.0.0",
 			allowedHosts: true,
-			https: {
-				key: readFileSync(new URL(".certs/localhost+2-key.pem", import.meta.url)),
-				cert: readFileSync(new URL(".certs/localhost+2.pem", import.meta.url)),
-			},
+			...(isDev && {
+				https: {
+					key: readFileSync(new URL(".certs/localhost+2-key.pem", import.meta.url)),
+					cert: readFileSync(new URL(".certs/localhost+2.pem", import.meta.url)),
+				},
+			}),
 			proxy: {
 				"/api": "http://localhost:3333",
 				"/auth": "http://localhost:3333",

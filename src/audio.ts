@@ -3,17 +3,37 @@
  * time. When the session ends, the completion chime plays through the SAME
  * audio element so it reuses the existing media session (no extra lockscreen
  * entry). MediaSession metadata shows the app icon as album art.
+ *
+ * create() returns a Session handle. All operations go through it.
+ * Starting a new session automatically invalidates any previous handle,
+ * so stale callbacks (inertia RAF, old event listeners) become harmless
+ * no-ops without any explicit checks at call sites.
  */
+
+/* ── Session handle ── */
+
+export interface Session {
+	play(): Promise<void>;
+	pause(): void;
+	seekTo(timeSec: number): void;
+	seekDrag(timeSec: number): void;
+	getCurrentTime(): number;
+	getDuration(): number;
+	playChime(): void;
+	destroy(): void;
+	readonly alive: boolean;
+}
+
+/* ── Module state ── */
 
 let audioEl: HTMLAudioElement | null = null;
 let audioUrl: string | null = null;
 let rafId = 0;
 let isPlayingChime = false;
+let gen = 0; /* incremented on every create(); stale handles see a mismatch */
 
 let onTickCb: ((curSec: number, durSec: number) => void) | null = null;
 let onEndedCb: (() => void) | null = null;
-let onPauseCb: (() => void) | null = null;
-let onPlayCb: (() => void) | null = null;
 
 /* ── WAV generation ── */
 
@@ -102,7 +122,7 @@ function createChimeWav(): Blob {
  * Play the chime through the existing audio element so it reuses
  * the same media session — no extra lockscreen entry.
  */
-export function playChime(): void {
+function playChimeInternal(): void {
 	if (!audioEl) return;
 	isPlayingChime = true;
 	cancelAnimationFrame(rafId);
@@ -129,9 +149,6 @@ function getAudioCtx(): AudioContext {
 /**
  * A single singing-bowl strike via Web Audio API.
  * Uses AudioContext so it never appears in lock screen controls.
- *
- * Fundamental + inharmonic partials give the metallic, bell-like
- * decay characteristic of a singing bowl.
  */
 export function playBell(): void {
 	const ctx = getAudioCtx();
@@ -179,16 +196,50 @@ function tick(): void {
 	rafId = requestAnimationFrame(tick);
 }
 
+function destroyInternal(): void {
+	isPlayingChime = false;
+	onTickCb = null;
+	onEndedCb = null;
+
+	cancelAnimationFrame(rafId);
+
+	if ("mediaSession" in navigator) {
+		navigator.mediaSession.metadata = null;
+		navigator.mediaSession.setActionHandler("pause", null);
+		navigator.mediaSession.setActionHandler("play", null);
+	}
+
+	if (audioEl) {
+		audioEl.pause();
+		audioEl.removeAttribute("src");
+		audioEl.load();
+		audioEl = null;
+	}
+	if (audioUrl) {
+		URL.revokeObjectURL(audioUrl);
+		audioUrl = null;
+	}
+}
+
+/**
+ * Create a new audio session. Returns a Session handle.
+ *
+ * Any previously-active session is destroyed automatically, and any
+ * handles from it become inert (all methods silently no-op). This is
+ * the key structural guarantee: you cannot accidentally operate on a
+ * dead session because the handle itself knows it's stale.
+ */
 export function create(
 	durationMinutes: number,
 	cbs: SessionAudioCallbacks,
-): void {
-	destroy();
+): Session {
+	destroyInternal();
+
+	const myGen = ++gen;
+	const isAlive = (): boolean => gen === myGen && audioEl !== null;
 
 	onTickCb = cbs.onTick;
 	onEndedCb = cbs.onEnded;
-	onPauseCb = cbs.onPause;
-	onPlayCb = cbs.onPlay;
 
 	const blob = createSilentWav(durationMinutes * 60);
 	audioUrl = URL.createObjectURL(blob);
@@ -197,21 +248,23 @@ export function create(
 	audioEl.volume = 1;
 
 	audioEl.addEventListener("ended", () => {
+		if (!isAlive()) return;
 		if (isPlayingChime) {
-			/* chime finished — nothing more to do */
 			isPlayingChime = false;
 			return;
 		}
 		onEndedCb?.();
 	});
 	audioEl.addEventListener("pause", () => {
+		if (!isAlive()) return;
 		cancelAnimationFrame(rafId);
-		if (!isPlayingChime) onPauseCb?.();
+		if (!isPlayingChime) cbs.onPause();
 	});
 	audioEl.addEventListener("play", () => {
+		if (!isAlive()) return;
 		if (!isPlayingChime) {
 			rafId = requestAnimationFrame(tick);
-			onPlayCb?.();
+			cbs.onPlay();
 		}
 	});
 
@@ -235,63 +288,49 @@ export function create(
 			audioEl?.play();
 		});
 	}
-}
 
-export function play(): Promise<void> {
-	return audioEl?.play() ?? Promise.resolve();
-}
-
-export function pause(): void {
-	audioEl?.pause();
-}
-
-export function seekTo(timeSec: number): void {
-	if (!audioEl || !Number.isFinite(audioEl.duration)) return;
-	audioEl.currentTime = Math.max(0, Math.min(timeSec, audioEl.duration));
-	onTickCb?.(audioEl.currentTime, audioEl.duration);
-}
-
-export function seekDrag(timeSec: number): void {
-	if (!audioEl || !Number.isFinite(audioEl.duration)) return;
-	audioEl.currentTime = Math.max(0, Math.min(timeSec, audioEl.duration));
-	onTickCb?.(audioEl.currentTime, audioEl.duration);
-}
-
-export function flushPositionState(): void {
-	/* no-op — kept for call-site compatibility */
-}
-
-export function getCurrentTime(): number {
-	return audioEl?.currentTime ?? 0;
-}
-
-export function getDuration(): number {
-	return audioEl?.duration ?? 0;
-}
-
-export function destroy(): void {
-	isPlayingChime = false;
-	onTickCb = null;
-	onEndedCb = null;
-	onPauseCb = null;
-	onPlayCb = null;
-
-	cancelAnimationFrame(rafId);
-
-	if ("mediaSession" in navigator) {
-		navigator.mediaSession.metadata = null;
-		navigator.mediaSession.setActionHandler("pause", null);
-		navigator.mediaSession.setActionHandler("play", null);
+	/**
+	 * Guard helper: returns the audio element if this session is still
+	 * alive, or null if it's been superseded / destroyed.
+	 * Every handle method funnels through this single gate.
+	 */
+	function el(): HTMLAudioElement | null {
+		return isAlive() ? audioEl : null;
 	}
 
-	if (audioEl) {
-		audioEl.pause();
-		audioEl.removeAttribute("src");
-		audioEl.load();
-		audioEl = null;
-	}
-	if (audioUrl) {
-		URL.revokeObjectURL(audioUrl);
-		audioUrl = null;
-	}
+	return {
+		get alive() {
+			return isAlive();
+		},
+		play() {
+			return el()?.play() ?? Promise.resolve();
+		},
+		pause() {
+			el()?.pause();
+		},
+		seekTo(timeSec: number) {
+			const a = el();
+			if (!a || !Number.isFinite(a.duration)) return;
+			a.currentTime = Math.max(0, Math.min(timeSec, a.duration));
+			onTickCb?.(a.currentTime, a.duration);
+		},
+		seekDrag(timeSec: number) {
+			const a = el();
+			if (!a || !Number.isFinite(a.duration)) return;
+			a.currentTime = Math.max(0, Math.min(timeSec, a.duration));
+			onTickCb?.(a.currentTime, a.duration);
+		},
+		getCurrentTime() {
+			return el()?.currentTime ?? 0;
+		},
+		getDuration() {
+			return el()?.duration ?? 0;
+		},
+		playChime() {
+			if (el()) playChimeInternal();
+		},
+		destroy() {
+			if (el()) destroyInternal();
+		},
+	};
 }

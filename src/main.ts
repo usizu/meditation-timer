@@ -1,4 +1,5 @@
-import * as audio from "./audio";
+import type { Session } from "./audio";
+import { create as createAudioSession } from "./audio";
 import { initStarfield } from "./canvas";
 import * as haptics from "./haptics";
 import {
@@ -54,6 +55,15 @@ const dailyMinutesEl = $("#daily-minutes");
 /* ── State ── */
 let selectedMinutes = loadDuration();
 const RING_CIRCUMFERENCE = 2 * Math.PI * 90; /* r=90 from SVG */
+
+/**
+ * The active audio session handle. All audio operations go through this.
+ * When null, no session is running. When a new session starts, the old
+ * handle is destroyed and becomes inert — any stale references (e.g.
+ * in-flight inertia callbacks) silently no-op.
+ */
+let session: Session | null = null;
+
 function updateDailyDisplay(): void {
 	dailyMinutesEl.textContent = String(getDailyMinutes());
 }
@@ -72,7 +82,7 @@ const timer = new Timer({
 		updateRing(progress);
 	},
 	onComplete() {
-		audio.playChime();
+		session?.playChime();
 		haptics.notifySuccess();
 		onSessionComplete(true);
 	},
@@ -108,7 +118,26 @@ function updateRing(progress: number): void {
 }
 
 /* ── Session lifecycle ── */
+
+/**
+ * Tear down the current session (if any) and start a fresh one.
+ *
+ * If a session is already running, it is ended and recorded before
+ * the new one begins. Because audio.create() returns a new Session
+ * handle and invalidates any prior one, stale callbacks from the old
+ * session (inertia RAF, lingering audio events) harmlessly no-op.
+ */
 function startSession(): void {
+	/* End any in-progress session cleanly */
+	if (session?.alive) {
+		onSessionComplete(false);
+	}
+
+	/* Kill leftover inertia / drag state from the previous session */
+	cancelAnimationFrame(inertiaRafId);
+	isDragging = false;
+	sessionView.classList.remove("dragging");
+
 	showView(sessionView);
 	timer.setDuration(selectedMinutes);
 	updateDisplay(selectedMinutes * 60 * 1000);
@@ -118,7 +147,7 @@ function startSession(): void {
 	const practice = practiceInput.value.trim() || undefined;
 	api.meditationStart(selectedMinutes, practice);
 
-	audio.create(selectedMinutes, {
+	session = createAudioSession(selectedMinutes, {
 		onTick(curSec, durSec) {
 			timer.handleTick(curSec, durSec);
 		},
@@ -134,7 +163,7 @@ function startSession(): void {
 		},
 	});
 
-	audio.play();
+	session.play();
 	timer.setState("running");
 	requestWakeLock();
 }
@@ -143,7 +172,11 @@ function onSessionComplete(completed: boolean): void {
 	const remainingMs = timer.getRemainingMs();
 	const durationMs = timer.getDurationMs();
 
-	if (!completed) audio.destroy();
+	if (!completed && session) {
+		session.destroy();
+	}
+	session = null;
+
 	releaseWakeLock();
 	sessionView.classList.remove("paused");
 
@@ -221,9 +254,9 @@ startBtn.addEventListener("click", () => {
 pauseBtn.addEventListener("click", () => {
 	haptics.tapLight();
 	if (timer.getState() === "running") {
-		audio.pause();
+		session?.pause();
 	} else if (timer.getState() === "paused") {
-		audio.play();
+		session?.play();
 	}
 });
 
@@ -234,7 +267,10 @@ stopBtn.addEventListener("click", () => {
 
 homeBtn.addEventListener("click", () => {
 	haptics.tapLight();
-	audio.destroy();
+	if (session) {
+		session.destroy();
+		session = null;
+	}
 	updateDailyDisplay();
 	showView(homeView);
 	updateRing(0);
@@ -269,7 +305,7 @@ let velocityY = 0;
 let inertiaRafId = 0;
 
 function computeSnap(rawTarget: number): number {
-	const dur = audio.getDuration();
+	const dur = session?.getDuration() ?? 0;
 	/* lock with 1 minute remaining — can't scrub past dur-60 */
 	const clamped = Math.max(0, Math.min(dur - 60, rawTarget));
 	return Math.round(clamped / SNAP_SECONDS) * SNAP_SECONDS;
@@ -288,17 +324,23 @@ function fireSnapHaptic(snapped: number): void {
 
 function snapAndSeek(rawTarget: number): void {
 	dragTarget = computeSnap(rawTarget);
-	audio.seekDrag(dragTarget);
+	session?.seekDrag(dragTarget);
 	fireSnapHaptic(dragTarget);
 }
 
 function applyDragSeek(): void {
 	dragTarget = computeSnap(dragTarget);
-	audio.seekDrag(dragTarget);
+	session?.seekDrag(dragTarget);
 	dragRafPending = false;
 }
 
 function inertiaStep(): void {
+	/* If session died mid-inertia, stop cleanly */
+	if (!session?.alive) {
+		sessionView.classList.remove("dragging");
+		return;
+	}
+
 	velocityX *= INERTIA_FRICTION;
 	velocityY *= INERTIA_FRICTION;
 
@@ -307,7 +349,7 @@ function inertiaStep(): void {
 		return;
 	}
 
-	const dur = audio.getDuration();
+	const dur = session.getDuration();
 	const sens = dragAxis === "x" ? DRAG_SENS_X : DRAG_SENS_Y;
 	const vel = dragAxis === "x" ? velocityX : velocityY;
 	const delta = (vel / dragRange) * dur * sens;
@@ -320,6 +362,7 @@ function inertiaStep(): void {
 
 sessionView.addEventListener("touchstart", (e) => {
 	if ((e.target as Element).closest(".session-controls")) return;
+	if (!session?.alive) return;
 
 	/* cancel any running inertia */
 	cancelAnimationFrame(inertiaRafId);
@@ -332,7 +375,7 @@ sessionView.addEventListener("touchstart", (e) => {
 	lastTouchTime = performance.now();
 	velocityX = 0;
 	velocityY = 0;
-	dragStartTime = audio.getCurrentTime();
+	dragStartTime = session.getCurrentTime();
 	isDragging = true;
 	dragAxis = null;
 	lastSnapSec = -1;
@@ -362,7 +405,7 @@ sessionView.addEventListener(
 
 		const dx = t.clientX - dragStartX;
 		const dy = t.clientY - dragStartY;
-		const dur = audio.getDuration();
+		const dur = session?.getDuration() ?? 0;
 
 		/* lock axis after first significant movement */
 		if (!dragAxis) {
